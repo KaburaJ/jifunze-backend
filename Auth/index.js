@@ -1,5 +1,5 @@
 require("dotenv").config();
-require("../Auth/src/config/googleAuth");
+// require("../Auth/src/config/googleAuth");
 const cors = require("cors");
 const express = require("express");
 const session = require("express-session");
@@ -10,9 +10,9 @@ const RedisStore = require("connect-redis").default;
 const { createClient } = require("redis");
 const userRoutes = require("./src/routers/userRoutes");
 
-const isLoggedIn = (req, res, next) => {
-  req.user ? next() : res.sendStatus(401);
-};
+// const isLoggedIn = (req, res, next) => {
+//   req.user ? next() : res.sendStatus(401);
+// };
 
 async function startApp() {
   try {
@@ -65,38 +65,39 @@ async function startApp() {
       })
     );
 
-    app.use(passport.initialize());
-    app.use(passport.session());
-    app.use((req, res, next) => {
-      req.pool = pool;
-      next();
-    });
+    // app.use(passport.initialize());
+    // app.use(passport.session());
+    // app.use((req, res, next) => {
+    //   req.pool = pool;
+    //   next();
+    // });
 
     app.get("/", (req, res) => {
       res.send("Jifunze Hub");
     });
 
-    app.get(
-      "/auth/google",
-      passport.authenticate("google", { scope: ["email", "profile"] })
-    );
+    // app.get(
+    //   "/auth/google",
+    //   passport.authenticate("google", { scope: ["email", "profile"] })
+    // );
 
-    app.get("/google/callback", (req, res, next) => {
-      passport.authenticate("google", {
-        successRedirect: "/protected",
-        failureRedirect: "/auth/failure",
-      })(req, res, next);
-    });
+    // app.get("/google/callback", (req, res, next) => {
+    //   passport.authenticate("google", {
+    //     successRedirect: "/protected",
+    //     failureRedirect: "/auth/failure",
+    //   })(req, res, next);
+    // });
 
-    app.get("/auth/failure", (req, res) => {
-      res.send("Something went wrong on our end");
-    });
+    // app.get("/auth/failure", (req, res) => {
+    //   res.send("Something went wrong on our end");
+    // });
 
-    app.get("/protected", isLoggedIn, (req, res) => {
+    // , isLoggedIn,
+    app.get("/protected", (req, res) => {
       res.send("Hello!");
     });
 
-    app.use("/", isLoggedIn, userRoutes);
+    app.use("/", userRoutes);
 
     const port = process.env.PORT || 8080;
     app.listen(port, () => {
