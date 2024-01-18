@@ -1,7 +1,7 @@
 require("dotenv").config();
 const cors = require("cors");
 const express = require("express");
-var session = require('cookie-session');
+const session = require("express-session");
 const { v4 } = require("uuid");
 const sql = require("mssql");
 const config = require("./src/config/userConfig");
@@ -9,12 +9,11 @@ const RedisStore = require("connect-redis").default;
 const { createClient } = require("redis");
 const userRoutes = require("./src/routers/userRoutes");
 
-
 async function startApp() {
   try {
     const app = express();
     // const pool = await sql.connect(config);
-    
+
     // app.use((req, res, next) => {
     //   req.pool = pool;
     //   next();
@@ -22,11 +21,11 @@ async function startApp() {
     // console.log("App Connected to database");
 
     const client = createClient({
-        password: 'FBaUqVovxxTpWnuCPtNkqM01vjCrzkUq',
-        socket: {
-            host: 'redis-17901.c251.east-us-mz.azure.cloud.redislabs.com',
-            port: 17901
-        }
+      password: "FBaUqVovxxTpWnuCPtNkqM01vjCrzkUq",
+      socket: {
+        host: "redis-17901.c251.east-us-mz.azure.cloud.redislabs.com",
+        port: 17901,
+      },
     });
     client.connect();
     console.log("Connected to Redis");
@@ -38,7 +37,6 @@ async function startApp() {
 
     const oneDay = 60 * 60 * 1000 * 24;
 
-
     app.use(express.json());
     app.use(
       cors({
@@ -48,23 +46,27 @@ async function startApp() {
       })
     );
 
+    app.set("trust proxy", 1);
+
     app.use(
       session({
-        store: redisStore,
-        secret: process.env.SECRET,
-        saveUninitialized: false,
-        genid: () => v4(),
-        resave: false,
-        rolling: true,
-        unset: "destroy",
         cookie: {
-          httpOnly: true,
-          maxAge: oneDay,
           secure: true,
-          domain: "*",
+          maxAge: 60000,
         },
+        store: new RedisStore(),
+        secret: "secret",
+        saveUninitialized: true,
+        resave: false,
       })
     );
+
+    app.use(function (req, res, next) {
+      if (!req.session) {
+        return next(new Error("Oh no")); //handle error
+      }
+      next(); //otherwise continue
+    });
 
     // app.use(passport.initialize());
     // app.use(passport.session());
