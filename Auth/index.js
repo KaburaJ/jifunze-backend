@@ -13,13 +13,13 @@ const userRoutes = require("./src/routers/userRoutes");
 async function startApp() {
   try {
     const app = express();
-    const pool = await sql.connect(config);
+    // const pool = await sql.connect(config);
     
-    app.use((req, res, next) => {
-      req.pool = pool;
-      next();
-    });
-    console.log("App Connected to database");
+    // app.use((req, res, next) => {
+    //   req.pool = pool;
+    //   next();
+    // });
+    // console.log("App Connected to database");
 
     const client = createClient({
         password: 'FBaUqVovxxTpWnuCPtNkqM01vjCrzkUq',
