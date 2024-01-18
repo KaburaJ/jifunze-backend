@@ -76,7 +76,7 @@ async function startApp() {
 
     app.use("/", userRoutes);
 
-    app.get("/protected",isLoggedIn, (req, res) => {
+    app.get("/protected", (req, res) => {
       res.send("Hello!");
     });
 
