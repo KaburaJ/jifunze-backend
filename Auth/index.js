@@ -1,6 +1,6 @@
 require("dotenv").config();
-require("../Auth/src/config/googleAuth");
-const passport = require("passport");
+// require("../Auth/src/config/googleAuth");
+// const passport = require("passport");
 const cors = require("cors");
 const express = require("express");
 const session = require("express-session");
@@ -11,9 +11,6 @@ const RedisStore = require("connect-redis").default;
 const { createClient } = require("redis");
 const userRoutes = require("./src/routers/userRoutes");
 
-const isLoggedIn = (req, res, next) => {
-  req.user ? next() : res.sendStatus(401);
-};
 
 async function startApp() {
   try {
@@ -66,12 +63,12 @@ async function startApp() {
       })
     );
 
-    app.use(passport.initialize());
-    app.use(passport.session());
-    app.use((req, res, next) => {
-      req.pool = pool;
-      next();
-    });
+    // app.use(passport.initialize());
+    // app.use(passport.session());
+    // app.use((req, res, next) => {
+    //   req.pool = pool;
+    //   next();
+    // });
 
     app.get("/", (req, res) => {
       res.send("Jifunze Hub");
