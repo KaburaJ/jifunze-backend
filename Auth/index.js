@@ -21,12 +21,11 @@ async function startApp() {
     // console.log("App Connected to database");
 
     const client = createClient({
-      password: "FBaUqVovxxTpWnuCPtNkqM01vjCrzkUq",
-      socket: {
-        host: "redis-17901.c251.east-us-mz.azure.cloud.redislabs.com",
-        port: 17901,
-      },
+      password: "FV7od1YMdgtxFRgX5wbNN9VwmcdJLu99",
+      url: "rediss://red-cmkldh21hbls73fqritg:FV7od1YMdgtxFRgX5wbNN9VwmcdJLu99@oregon-redis.render.com:6379",
+      connect_timeout: 5000, 
     });
+    
     client.connect();
     console.log("Connected to Redis");
 
