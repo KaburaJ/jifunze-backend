@@ -1,7 +1,7 @@
 require("dotenv").config();
 const cors = require("cors");
 const express = require("express");
-const session = require("express-session");
+var session = require('cookie-session');
 const { v4 } = require("uuid");
 const sql = require("mssql");
 const config = require("./src/config/userConfig");
@@ -83,10 +83,10 @@ async function startApp() {
       res.send("Hello!");
     });
 
-    const port = process.env.PORT || 8080;
-    app.listen(port, () => {
-      console.log(`Server is listening at port ${port}`);
-    });
+    // const port = process.env.PORT || 8080;
+    // app.listen(port, () => {
+    //   console.log(`Server is listening at port ${port}`);
+    // });
   } catch (error) {
     console.log("Error connecting to database");
     console.log(error);
