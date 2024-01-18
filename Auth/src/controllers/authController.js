@@ -27,8 +27,6 @@ module.exports = {
                 const results = await request.execute('dbo.AddUser');
                 res.json(results.recordset)
             }
-
-            
         }
         catch(e)
         {
