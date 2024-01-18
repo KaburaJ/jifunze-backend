@@ -58,17 +58,10 @@ async function startApp() {
           httpOnly: true,
           maxAge: oneDay,
           secure: false,
-          domain: "https://jifunzehub-v1.azurewebsites.net/",
+          domain: "https://jifunze-hub.onrender.com/",
         },
       })
     );
-
-    // app.use(passport.initialize());
-    // app.use(passport.session());
-    // app.use((req, res, next) => {
-    //   req.pool = pool;
-    //   next();
-    // });
 
     app.get("/", (req, res) => {
       res.send("Jifunze Hub");
