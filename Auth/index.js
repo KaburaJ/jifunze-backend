@@ -23,8 +23,8 @@ async function startApp() {
     const client = createClient({
       password: "FBaUqVovxxTpWnuCPtNkqM01vjCrzkUq",
       socket: {
-        host: "redis://red-cmkldh21hbls73fqritg:6379",
-        port: 6379,
+        host: "redis-17901.c251.east-us-mz.azure.cloud.redislabs.com",
+        port: 17901,
       },
     });
     client.connect();
