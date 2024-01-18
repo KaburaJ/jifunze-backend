@@ -14,7 +14,7 @@ const userRoutes = require("./src/routers/userRoutes");
 
 async function startApp() {
   try {
-    const pool = await sql.connect(config);
+    await sql.connect(config);
     console.log("App Connected to database");
 
     const redisClient = createClient({
