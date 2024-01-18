@@ -12,31 +12,32 @@ const userRoutes = require("./src/routers/userRoutes");
 
 async function startApp() {
   try {
+    const app = express();
     const pool = await sql.connect(config);
-      app.use((req, res, next) => {
+    
+    app.use((req, res, next) => {
       req.pool = pool;
       next();
     });
     console.log("App Connected to database");
 
-    const redisClient = createClient({
-      password: '',
-      socket: {
-          host: 'redis-17901.c251.east-us-mz.azure.cloud.redislabs.com',
-          port: 17901
-      }
-  });
-    redisClient.connect();
+    const client = createClient({
+        password: 'FBaUqVovxxTpWnuCPtNkqM01vjCrzkUq',
+        socket: {
+            host: 'redis-17901.c251.east-us-mz.azure.cloud.redislabs.com',
+            port: 17901
+        }
+    });
+    client.connect();
     console.log("Connected to Redis");
 
     const redisStore = new RedisStore({
-      client: redisClient,
+      client: client,
       prefix: "",
     });
 
     const oneDay = 60 * 60 * 1000 * 24;
 
-    const app = express();
 
     app.use(express.json());
     app.use(
