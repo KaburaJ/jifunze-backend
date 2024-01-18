@@ -77,28 +77,11 @@ async function startApp() {
       res.send("Jifunze Hub");
     });
 
-    app.get(
-      "/auth/google",
-      passport.authenticate("google", { scope: ["email", "profile"] })
-    );
-
-    app.get("/google/callback", (req, res, next) => {
-      passport.authenticate("google", {
-        successRedirect: "/protected",
-        failureRedirect: "/auth/failure",
-      })(req, res, next);
-    });
-
-    app.get("/auth/failure", (req, res) => {
-      res.send("Something went wrong on our end");
-    });
-
+    app.use("/", userRoutes);
 
     app.get("/protected",isLoggedIn, (req, res) => {
       res.send("Hello!");
     });
-
-    app.use("/", userRoutes);
 
     const port = process.env.PORT || 8080;
     app.listen(port, () => {
