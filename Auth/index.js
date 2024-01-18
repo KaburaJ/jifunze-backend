@@ -1,6 +1,4 @@
 require("dotenv").config();
-// require("../Auth/src/config/googleAuth");
-// const passport = require("passport");
 const cors = require("cors");
 const express = require("express");
 const session = require("express-session");
