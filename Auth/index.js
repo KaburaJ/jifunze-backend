@@ -14,7 +14,11 @@ const userRoutes = require("./src/routers/userRoutes");
 
 async function startApp() {
   try {
-    await sql.connect(config);
+    const pool = await sql.connect(config);
+      app.use((req, res, next) => {
+      req.pool = pool;
+      next();
+    });
     console.log("App Connected to database");
 
     const redisClient = createClient({
@@ -58,10 +62,17 @@ async function startApp() {
           httpOnly: true,
           maxAge: oneDay,
           secure: true,
-          domain: "",
+          domain: "*",
         },
       })
     );
+
+    // app.use(passport.initialize());
+    // app.use(passport.session());
+    // app.use((req, res, next) => {
+    //   req.pool = pool;
+    //   next();
+    // });
 
     app.get("/", (req, res) => {
       res.send("Jifunze Hub");
@@ -73,10 +84,10 @@ async function startApp() {
       res.send("Hello!");
     });
 
-    // const port = process.env.PORT || 8080;
-    // app.listen(port, () => {
-    //   console.log(`Server is listening at port ${port}`);
-    // });
+    const port = process.env.PORT || 8080;
+    app.listen(port, () => {
+      console.log(`Server is listening at port ${port}`);
+    });
   } catch (error) {
     console.log("Error connecting to database");
     console.log(error);
