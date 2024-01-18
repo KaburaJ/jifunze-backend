@@ -57,8 +57,8 @@ async function startApp() {
         cookie: {
           httpOnly: true,
           maxAge: oneDay,
-          secure: false,
-          domain: "https://jifunze-hub.onrender.com/",
+          secure: true,
+          domain: "",
         },
       })
     );
