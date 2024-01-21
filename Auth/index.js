@@ -1,3 +1,71 @@
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     BearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *   schemas:
+ *     Error:
+ *       type: object
+ *       properties:
+ *         error:
+ *           type: string
+ *     Success:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *         message:
+ *           type: string
+ *         result:
+ *           type: object
+ */
+
+/**
+ * @swagger
+ * tags:
+ *   name: JifunzeHub
+ *   description: Jifunze Hub application
+ */
+
+/**
+ * @swagger
+ * /:
+ *   get:
+ *     summary: Welcome message
+ *     tags: [JifunzeHub]
+ *     responses:
+ *       200:
+ *         description: Welcome message
+ */
+
+/**
+ * @swagger
+ * /api-docs:
+ *   get:
+ *     summary: Swagger UI documentation
+ *     tags: [JifunzeHub]
+ *     responses:
+ *       200:
+ *         description: Swagger UI documentation page
+ */
+
+/**
+ * @swagger
+ * /protected:
+ *   get:
+ *     summary: Protected route
+ *     description: Displays a message for authenticated users
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully authenticated
+ *       401:
+ *         description: Authentication failed
+ */
+
 require("dotenv").config();
 const cors = require("cors");
 const express = require("express");
@@ -8,6 +76,9 @@ const config = require("./src/config/userConfig");
 const RedisStore = require("connect-redis").default;
 const { createClient } = require("redis");
 const userRoutes = require("./src/routers/userRoutes");
+const swaggerUi = require("swagger-ui-express");
+const swaggerJsdoc = require("swagger-jsdoc");
+
 
 async function startApp() {
   try {
@@ -19,6 +90,21 @@ async function startApp() {
     //   next();
     // });
     // console.log("App Connected to database");
+    const options = {
+      definition: {
+        openapi: "3.0.0",
+        info: {
+          title: "Jifunze Hub API Documentation", 
+          version: "1.0.0",
+          description: "Documentation for Jifunze Hub API",
+        },
+      },
+      apis: ["./src/routers/*.js"], 
+    };
+    const specs = swaggerJsdoc(options);
+
+    // Serve Swagger UI
+    app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
     const client = createClient({
       password: "FBaUqVovxxTpWnuCPtNkqM01vjCrzkUq",
