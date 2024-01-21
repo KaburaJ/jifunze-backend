@@ -127,7 +127,7 @@ async function startApp() {
     app.use(express.json());
     app.use(
       cors({
-        origin: "*",
+        origin: "https://jifunze-hub.onrender.com/",
         credentials: true,
         optionSuccessStatus: 200,
       })
