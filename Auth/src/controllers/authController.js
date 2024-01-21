@@ -137,6 +137,7 @@ module.exports = {
           .input('UserPasswordHash', hashedPassword);
 
         const results = await request.execute('[dbo].[Users]');
+        sql.close();
         res.json(results.recordset);
 
         console.log('CONNECTED AT SIGN UP');
