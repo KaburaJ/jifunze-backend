@@ -1,5 +1,12 @@
 /**
  * @swagger
+ * tags:
+ *   name: Authentication
+ *   description: User authentication and authorization
+ */
+
+/**
+ * @swagger
  * components:
  *   schemas:
  *     User:
@@ -17,9 +24,17 @@
 
 /**
  * @swagger
- * tags:
- *   name: Authentication
- *   description: User authentication and authorization
+ * components:
+ *   schemas:
+ *     LoginRequest:
+ *       type: object
+ *       properties:
+ *         UserEmail:
+ *           type: string
+ *           format: email
+ *         UserPasswordHash:
+ *           type: string
+ *           pattern: "^[A-Za-z0-9]"
  */
 
 /**
@@ -54,16 +69,14 @@
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/User'
+ *             $ref: '#/components/schemas/LoginRequest'
  *     responses:
  *       200:
  *         description: User login successful
  *       400:
  *         description: Bad request or validation error
  *       401:
- *         description: Incorrect password
- *       404:
- *         description: No user found
+ *         description: Incorrect password or user not found
  *       500:
  *         description: Internal server error
  */
@@ -81,13 +94,12 @@
  *         description: Internal server error
  */
 
+const express = require('express');
+const { registerUser, loginUser, logoutUser } = require('../controllers/authController');
+const userRoutes = express.Router();
 
-const express = require('express')
-const { registerUser, loginUser, logoutUser } = require('../controllers/authController')
-const userRoutes = express.Router()
+userRoutes.post('/user/signup', registerUser);
+userRoutes.post('/user/login', loginUser);
+userRoutes.get('/user/logout', logoutUser);
 
-userRoutes.post('/user/signup', registerUser)
-userRoutes.post('/user/login', loginUser)
-userRoutes.get('/user/logout', logoutUser)
-
-module.exports = userRoutes
+module.exports = userRoutes;
