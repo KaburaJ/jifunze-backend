@@ -104,6 +104,9 @@ const { Connection } = require('tedious');
 const userSchema = require('../validators/userRegistrationValidator');
 const loginSchema = require('../validators/userLoginValidator');
 const config = require('../config/userConfig');
+const ejs = require('ejs');
+const path = require('path');
+const sendMail = require('../utils/authMail')
 
 const connection = new Connection(config);
 
@@ -137,7 +140,6 @@ module.exports = {
           .input('UserPasswordHash', hashedPassword);
 
         const results = await request.execute('[dbo].[AddUser]');
-        sql.close();
         res.json(results.recordset);
 
         console.log('CONNECTED AT SIGN UP');
@@ -149,6 +151,9 @@ module.exports = {
           UserEmail: user.UserEmail,
           UserPasswordHash: hashedPassword,
         });
+
+        const emailBody = await ejs.renderFile(path.join(__dirname, '../views/email.ejs'), { userName: user.FirstName });
+        sendMail(user.UserEmail, 'Verification Email', emailBody);
       }
     } catch (e) {
       console.error(e);

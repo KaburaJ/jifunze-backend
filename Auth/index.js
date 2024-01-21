@@ -79,11 +79,13 @@ const { createClient } = require("redis");
 const userRoutes = require("./src/routers/userRoutes");
 const swaggerUi = require("swagger-ui-express");
 const swaggerJsdoc = require("swagger-jsdoc");
+const ejs = require('ejs');
 
 
 async function startApp() {
   try {
     const app = express();
+    app.set('view engine', 'ejs');
     // const pool = await sql.connect(config);
 
     // app.use((req, res, next) => {
