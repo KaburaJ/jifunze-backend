@@ -4,7 +4,7 @@ const Config = {
     user: process.env.DB_USER,
     password: process.env.DB_PWD,
     database: process.env.DB_NAME,
-    server: 'jifunzehub.database.windows.net',
+    server: 'jifunzehub.database.windows.net', //IP
     port: 1433,
     pool: {
         max: 10,
