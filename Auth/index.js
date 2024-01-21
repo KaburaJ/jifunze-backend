@@ -27,6 +27,7 @@
  * tags:
  *   name: JifunzeHub
  *   description: Jifunze Hub application
+ *   url: 'https://jifunze-hub.onrender.com/'
  */
 
 /**
