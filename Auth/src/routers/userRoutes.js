@@ -20,6 +20,8 @@
  *           type: string
  *         UserPasswordHash:
  *           type: string
+ *         UserCPassword:
+ *           type: string
  */
 
 /**
