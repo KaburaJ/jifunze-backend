@@ -136,7 +136,7 @@ module.exports = {
           .input('UserEmail', user.UserEmail)
           .input('UserPasswordHash', hashedPassword);
 
-        const results = await request.execute('[dbo].[Users]');
+        const results = await request.execute('[dbo].[AddUser]');
         sql.close();
         res.json(results.recordset);
 
