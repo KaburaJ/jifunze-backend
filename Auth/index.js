@@ -66,7 +66,6 @@
  *         description: Authentication failed
  */
 
-
 require("dotenv").config();
 const cors = require("cors");
 const express = require("express");
@@ -79,30 +78,32 @@ const { createClient } = require("redis");
 const userRoutes = require("./src/routers/userRoutes");
 const swaggerUi = require("swagger-ui-express");
 const swaggerJsdoc = require("swagger-jsdoc");
-const ejs = require('ejs');
-
+const ejs = require("ejs");
 
 async function startApp() {
+  
+  const pool = await sql.connect(config);
+
+  app.use((req, res, next) => {
+    req.pool = pool;
+    next();
+  });
+  console.log("App Connected to database");
+
+
   try {
     const app = express();
-    app.set('view engine', 'ejs');
-    // const pool = await sql.connect(config);
-
-    // app.use((req, res, next) => {
-    //   req.pool = pool;
-    //   next();
-    // });
-    // console.log("App Connected to database");
+    app.set("view engine", "ejs");
     const options = {
       definition: {
         openapi: "3.0.0",
         info: {
-          title: "Jifunze Hub API Documentation", 
+          title: "Jifunze Hub API Documentation",
           version: "1.0.0",
           description: "Documentation for Jifunze Hub API",
         },
       },
-      apis: ["./src/routers/*.js"], 
+      apis: ["./src/routers/*.js"],
     };
     const specs = swaggerJsdoc(options);
 
