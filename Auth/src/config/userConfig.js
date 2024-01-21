@@ -1,9 +1,11 @@
-require('dotenv').config();
+require('dotenv').config()
 
-const connectionString = `Server=tcp:${process.env.DB_SERVER},1433;Initial Catalog=${process.env.DB_NAME};Persist Security Info=False;User ID=${process.env.DB_USER};Password=${process.env.DB_PWD};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;`;
-
-const config = {
-    connectionString: connectionString,
+const Config = {
+    user: process.env.DB_USER,
+    password: process.env.DB_PWD,
+    database: process.env.DB_NAME,
+    server: 'jifunzehub.database.windows.net', //IP
+    port: 1433,
     pool: {
         max: 10,
         min: 0,
@@ -13,6 +15,6 @@ const config = {
         encrypt: true, 
         trustServerCertificate: false 
     }
-};
-
-module.exports = config;
+    }
+    
+module.exports = Config;
