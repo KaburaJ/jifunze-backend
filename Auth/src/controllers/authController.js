@@ -120,6 +120,7 @@ connection.on('connect', function (err) {
 
 module.exports = {
   registerUser: async (req, res) => {
+    console.log(process.env.DB_USER);
     try {
       const { error, value } = userSchema.validate(req.body);
       if (error) {

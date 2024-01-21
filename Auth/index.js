@@ -81,14 +81,15 @@ const swaggerJsdoc = require("swagger-jsdoc");
 const ejs = require("ejs");
 
 async function startApp() {
-  
-  const pool = await sql.connect(config);
 
-  app.use((req, res, next) => {
-    req.pool = pool;
-    next();
-  });
-  console.log("App Connected to database");
+  const pool = await sql.connect(config);
+  console.log(pool);
+
+  // app.use((req, res, next) => {
+  //   req.pool = pool;
+  //   next();
+  // });
+  // console.log("App Connected to database");
 
 
   try {
@@ -174,6 +175,8 @@ async function startApp() {
     app.get("/protected", (req, res) => {
       res.send("Hello!");
     });
+
+    console.log('user', process.env.DB_USER);
 
     const port = process.env.PORT || 8080;
     app.listen(port, () => {

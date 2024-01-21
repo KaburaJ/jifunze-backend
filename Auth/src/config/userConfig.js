@@ -13,7 +13,7 @@ const Config = {
     },
     options: {
         encrypt: true, 
-        trustServerCertificate: false
+        trustServerCertificate: true
     }
     }
     
