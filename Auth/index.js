@@ -80,9 +80,25 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerJsdoc = require("swagger-jsdoc");
 const ejs = require("ejs");
 
-async function startApp() {
+async function start(){
+  try {
+  
+    const pool =  await sql.connect(config);
+  
+    if (pool){
+     startApp(pool);  
+    }
+  
+  }catch(e){
+    console.log(e)
+  }
+  
+}
 
-  const pool = await sql.connect(config);
+async function startApp(pool) {
+
+  const app = express();
+ 
   console.log(pool);
 
   // app.use((req, res, next) => {
@@ -91,9 +107,7 @@ async function startApp() {
   // });
   // console.log("App Connected to database");
 
-
   try {
-    const app = express();
     app.set("view engine", "ejs");
     const options = {
       definition: {
@@ -188,4 +202,4 @@ async function startApp() {
   }
 }
 
-startApp();
+start();
