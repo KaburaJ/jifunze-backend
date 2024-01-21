@@ -97,12 +97,23 @@
  */
 
 
-const userSchema = require("../validators/userRegistrationValidator");
-const loginSchema = require("../validators/userLoginValidator");
-const config = require("../config/userConfig");
-const mssql = require("mssql");
-const bcrypt = require("bcrypt");
-require("dotenv").config();
+const Joi = require('joi');
+const bcrypt = require('bcrypt');
+const mssql = require('mssql');
+const { Connection } = require('tedious');
+const userSchema = require('../validators/userRegistrationValidator');
+const loginSchema = require('../validators/userLoginValidator');
+const config = require('../config/userConfig');
+
+const connection = new Connection(config);
+
+connection.on('connect', function (err) {
+  if (err) {
+    console.error('Error connecting to the database:', err);
+  } else {
+    console.log('Connected to the database');
+  }
+});
 
 module.exports = {
   registerUser: async (req, res) => {
@@ -114,32 +125,33 @@ module.exports = {
 
       const user = req.body;
       const hashedPassword = await bcrypt.hash(user.UserPasswordHash, 8);
+
       const sql = await mssql.connect(config);
 
       if (sql.connected) {
-        console.log("CONNECTED AT SIGN UP");
         const request = new mssql.Request(sql);
         request
-          .input("FirstName", user.FirstName)
-          .input("LastName", user.LastName)
-          .input("UserEmail", user.UserEmail)
-          .input("UserPasswordHash", hashedPassword);
+          .input('FirstName', user.FirstName)
+          .input('LastName', user.LastName)
+          .input('UserEmail', user.UserEmail)
+          .input('UserPasswordHash', hashedPassword);
 
-        const results = await request.execute("dbo.AddUser");
+        const results = await request.execute('dbo.AddUser');
         res.json(results.recordset);
+
+        console.log('CONNECTED AT SIGN UP');
+        console.log('Received request body:', req.body);
+        console.log('Hashed Password:', hashedPassword);
+        console.log('Parameters sent to stored procedure:', {
+          FirstName: user.FirstName,
+          LastName: user.LastName,
+          UserEmail: user.UserEmail,
+          UserPasswordHash: hashedPassword,
+        });
       }
-      // Add these log statements in your registerUser function
-      console.log("Received request body:", req.body);
-      console.log("Hashed Password:", hashedPassword);
-      console.log("Parameters sent to stored procedure:", {
-        FirstName: user.FirstName,
-        LastName: user.LastName,
-        UserEmail: user.UserEmail,
-        UserPasswordHash: hashedPassword,
-      });
     } catch (e) {
-      console.log(e);
-      res.status(500).send("An error occured when registering a user");
+      console.error(e);
+      res.status(500).send('An error occurred when registering a user');
     }
   },
 
@@ -152,11 +164,13 @@ module.exports = {
 
       const user = value;
       const sql = await mssql.connect(config);
+
       if (sql.connected) {
         const request = new mssql.Request(sql);
-        request.input("UserEmail", user.UserEmail);
+        request.input('UserEmail', user.UserEmail);
+
         const result = await request.query(
-          "SELECT * FROM dbo.Users WHERE UserEmail = @UserEmail"
+          'SELECT * FROM dbo.Users WHERE UserEmail = @UserEmail'
         );
 
         if (result.recordset.length) {
@@ -165,16 +179,17 @@ module.exports = {
             user.UserPasswordHash,
             dbPassword
           );
+
           if (passwordsMatch) {
             req.session.user = result.recordset[0];
-            console.log(req.session.user);
+
             req.session.save((error) => {
               if (error) {
-                console.error("Session save error:", error);
+                console.error('Session save error:', error);
               } else {
                 res.status(200).json({
                   success: true,
-                  message: "Logged in successfully",
+                  message: 'Logged in successfully',
                   result: req.session.user,
                 });
               }
@@ -182,21 +197,21 @@ module.exports = {
           } else {
             res.status(401).json({
               success: false,
-              message: "Incorrect password",
+              message: 'Incorrect password',
             });
           }
         } else {
-          res.status(404).json({ success: false, message: "No user found" });
+          res.status(404).json({ success: false, message: 'No user found' });
         }
       } else {
         res
           .status(500)
-          .json({ success: false, message: "Database connection error" });
+          .json({ success: false, message: 'Database connection error' });
       }
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: "Login error",
+        message: 'Login error',
       });
     }
   },
@@ -206,15 +221,15 @@ module.exports = {
       if (err) {
         res.status(200).json({
           success: true,
-          message: "You have been logged out",
+          message: 'You have been logged out',
         });
       } else {
         req.logout(() => {
           res.status(200).json({
             success: true,
-            message: "You have been logged out",
+            message: 'You have been logged out',
           });
-          res.redirect("/auth/google");
+          res.redirect('/auth/google');
         });
       }
     });
