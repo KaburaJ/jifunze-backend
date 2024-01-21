@@ -117,6 +117,7 @@ module.exports = {
       const sql = await mssql.connect(config);
 
       if (sql.connected) {
+        console.log("CONNECTED AT SIGN UP");
         const request = new mssql.Request(sql);
         request
           .input("FirstName", user.FirstName)
