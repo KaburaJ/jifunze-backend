@@ -2,7 +2,7 @@
  * @swagger
  * tags:
  *   name: GoogleAuth
- *   description: Google Authentication routes
+ *   description: https://jifunze-hub-google-signup.onrender.com
  */
 
 /**

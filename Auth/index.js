@@ -26,7 +26,7 @@
  * @swagger
  * tags:
  *   name: JifunzeHub
- *   description: Jifunze Hub application
+ *   description: https://jifunze-hub.onrender.com
  */
 
 /**
