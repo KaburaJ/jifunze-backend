@@ -84,7 +84,7 @@ const swaggerJsdoc = require("swagger-jsdoc");
 async function startApp() {
   try {
     const app = express();
-    // const pool = await sql.connect(config);
+    const pool = await sql.connect(config);
 
     // app.use((req, res, next) => {
     //   req.pool = pool;
