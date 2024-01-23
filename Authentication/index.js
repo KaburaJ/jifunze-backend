@@ -6,7 +6,7 @@ const session = require("express-session");
 const passport = require("passport");
 const swaggerUi = require("swagger-ui-express");
 const swaggerJsdoc = require("swagger-jsdoc");
-
+const cors = require("cors");
 const app = express();
 app.use(cors());
 app.use(session({ secret: process.env.SECRET }));
