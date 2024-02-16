@@ -70,19 +70,6 @@
 
 /**
  * @swagger
- * /user/logout:
- *   get:
- *     summary: Logout a user
- *     tags: [Authentication]
- *     responses:
- *       200:
- *         description: User logout successful
- *       500:
- *         description: Internal server error
- */
-
-/**
- * @swagger
  * /protected:
  *   get:
  *     summary: Protected route
@@ -207,24 +194,4 @@ loginUser: async (req, res) => {
         console.error('Login error:', error);
         res.status(500).json({ success: false, message: 'Login error' });
     }
-},
-
-  logoutUser: (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        res.status(200).json({
-          success: true,
-          message: 'You have been logged out',
-        });
-      } else {
-        req.logout(() => {
-          res.status(200).json({
-            success: true,
-            message: 'You have been logged out',
-          });
-          res.redirect('/auth/google');
-        });
-      }
-    });
-  },
-};
+}
