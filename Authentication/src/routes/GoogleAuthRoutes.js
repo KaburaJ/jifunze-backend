@@ -37,10 +37,36 @@ GoogleAuthRoutes.get(
  *       401:
  *         description: Authentication failed
  */
-GoogleAuthRoutes.get("/google/callback", (req, res, next) => {
-  passport.authenticate("google", {
-    successRedirect: "/protected",
-    failureRedirect: "/auth/failure",
+GoogleAuthRoutes.get("/google/callback", async (req, res, next) => {
+  passport.authenticate("google", async (err, user) => {
+    if (err || !user) {
+      res.redirect("/auth/failure");
+      return;
+    }
+
+    try {
+      const sql = await mssql.connect(config);
+      const request = new mssql.Request(sql);
+      request.input('FirstName', user.FirstName); 
+      request.input('LastName', user.LastName);
+      request.input('UserEmail', user.Email);
+      request.input('UserPasswordHash', null);
+
+      const result = await request.execute('[dbo].[JifunzeAddUser]');
+
+      if (result && result.rowsAffected && result.rowsAffected[0] > 0) {
+        res.status(200).json({
+          success: true,
+          message: 'User added and logged in successfully',
+          user: user 
+        });
+      } else {
+        res.redirect("/auth/failure");
+      }
+    } catch (error) {
+      console.error('Error adding user to database:', error);
+      res.redirect("/auth/failure");
+    }
   })(req, res, next);
 });
 
