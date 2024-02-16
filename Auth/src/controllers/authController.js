@@ -174,7 +174,7 @@ module.exports = {
 
       if (sql.connected) {
         const request = new mssql.Request(sql);
-        request.input('UserEmail', user.UserEmail);
+        request.input('LoginUserEmail', user.UserEmail);
 
          const result = await request.execute('[dbo].[JifunzeUserLogin]');
         res.json(results.recordset);
