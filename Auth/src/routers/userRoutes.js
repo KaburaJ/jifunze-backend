@@ -83,19 +83,6 @@
  *         description: Internal server error
  */
 
-/**
- * @swagger
- * /user/logout:
- *   get:
- *     summary: Logout a user
- *     tags: [Authentication]
- *     responses:
- *       200:
- *         description: User logout successful
- *       500:
- *         description: Internal server error
- */
-
 const express = require('express');
 const { registerUser, loginUser } = require('../controllers/authController');
 const userRoutes = express.Router();
