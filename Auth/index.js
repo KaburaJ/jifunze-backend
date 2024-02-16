@@ -125,20 +125,20 @@ async function startApp(pool) {
     // Serve Swagger UI
     app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
-    const client = createClient({
-      password: "FBaUqVovxxTpWnuCPtNkqM01vjCrzkUq",
-      socket: {
-        host: "redis-17901.c251.east-us-mz.azure.cloud.redislabs.com",
-        port: 17901,
-      },
-    });
-    client.connect();
-    console.log("Connected to Redis");
+    // const client = createClient({
+    //   password: "FBaUqVovxxTpWnuCPtNkqM01vjCrzkUq",
+    //   socket: {
+    //     host: "redis-17901.c251.east-us-mz.azure.cloud.redislabs.com",
+    //     port: 17901,
+    //   },
+    // });
+    // client.connect();
+    // console.log("Connected to Redis");
 
-    const redisStore = new RedisStore({
-      client: client,
-      prefix: "",
-    });
+    // const redisStore = new RedisStore({
+    //   client: client,
+    //   prefix: "",
+    // });
 
     const oneDay = 60 * 60 * 1000 * 24;
 
@@ -153,25 +153,25 @@ async function startApp(pool) {
 
     app.set("trust proxy", 1);
 
-    app.use(
-      session({
-        cookie: {
-          secure: true,
-          maxAge: 60000,
-        },
-        store: redisStore,
-        secret: "secret",
-        saveUninitialized: true,
-        resave: false,
-      })
-    );
+    // app.use(
+    //   session({
+    //     cookie: {
+    //       secure: true,
+    //       maxAge: 60000,
+    //     },
+    //     store: redisStore,
+    //     secret: "secret",
+    //     saveUninitialized: true,
+    //     resave: false,
+    //   })
+    // );
 
-    app.use(function (req, res, next) {
-      if (!req.session) {
-        return next(new Error("Oh no")); //handle error
-      }
-      next(); //otherwise continue
-    });
+    // app.use(function (req, res, next) {
+    //   if (!req.session) {
+    //     return next(new Error("Oh no")); //handle error
+    //   }
+    //   next(); //otherwise continue
+    // });
 
     // app.use(passport.initialize());
     // app.use(passport.session());
