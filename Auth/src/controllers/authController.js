@@ -176,9 +176,8 @@ module.exports = {
         const request = new mssql.Request(sql);
         request.input('UserEmail', user.UserEmail);
 
-        const result = await request.query(
-          'SELECT * FROM [dbo].[Users] WHERE UserEmail = @UserEmail'
-        );
+         const result = await request.execute('[dbo].[JifunzeUserLogin]');
+        res.json(results.recordset);
 
         if (result.recordset.length) {
           const dbPassword = result.recordset[0].UserPasswordHash;
