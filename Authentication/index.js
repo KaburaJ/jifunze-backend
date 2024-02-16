@@ -8,8 +8,13 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerJsdoc = require("swagger-jsdoc");
 const cors = require("cors");
 const app = express();
-app.use(cors());
-app.use(session({ secret: process.env.SECRET }));
+app.use(
+  cors({
+    origin: "https://jifunze-hub-google-signup.onrender.com/",
+    credentials: true,
+    optionSuccessStatus: 200,
+  })
+);app.use(session({ secret: process.env.SECRET }));
 app.use(passport.initialize());
 app.use(passport.session());
 
