@@ -177,7 +177,7 @@ module.exports = {
         request.input('UserEmail', user.UserEmail);
 
         const result = await request.query(
-          'SELECT * FROM dbo.Users WHERE UserEmail = @UserEmail'
+          'SELECT * FROM [dbo].[Users] WHERE UserEmail = @UserEmail'
         );
 
         if (result.recordset.length) {
