@@ -41,7 +41,7 @@ const specs = swaggerJsdoc(options);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 // Routes
-app.use("/auth", GoogleAuthRoutes);
+app.use("/", GoogleAuthRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
