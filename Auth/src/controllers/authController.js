@@ -133,7 +133,7 @@ module.exports = {
         res.json({
           success: true,
           message: 'Logged in successfully',
-          data: results.message
+          data: results.recordset.message
       });
 
         console.log('CONNECTED AT SIGN UP');
