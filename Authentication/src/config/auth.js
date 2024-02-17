@@ -2,10 +2,10 @@ const passport = require("passport");
 require("dotenv").config();
 const GoogleStrategy = require('passport-google-oauth2').Strategy;
 
-const googleStrategy = new GoogleStrategy({
+passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: "", // Leave this empty for now
+  // clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: "http://localhost:5000/google/callback",
   passReqToCallback: true
 }, function(request, accessToken, refreshToken, profile, done) {
   const user = {
@@ -15,9 +15,7 @@ const googleStrategy = new GoogleStrategy({
   };
 
   return done(null, user);
-});
-
-passport.use(googleStrategy);
+}));
 
 passport.serializeUser(function(user, done) {
   done(null, user);
