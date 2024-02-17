@@ -1,27 +1,20 @@
+require("./src/config/auth");
+require("dotenv").config();
+const GoogleAuthRoutes= require("./src/routes/GoogleAuthRoutes");
 const express = require("express");
 const session = require("express-session");
 const passport = require("passport");
 const swaggerUi = require("swagger-ui-express");
 const swaggerJsdoc = require("swagger-jsdoc");
 const cors = require("cors");
-const GoogleAuthRoutes = require("./src/routes/GoogleAuthRoutes");
-require("dotenv").config();
-
 const app = express();
-
-// CORS configuration
-app.use(cors());
-
-// Session middleware
 app.use(
-  session({
-    secret: process.env.SECRET,
-    resave: false,
-    saveUninitialized: false,
+  cors({
+    origin: "https://jifunze-hub-google-signup.onrender.com/",
+    credentials: true,
+    optionSuccessStatus: 200,
   })
-);
-
-// Initialize Passport
+);app.use(session({ secret: process.env.SECRET }));
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -38,18 +31,14 @@ const options = {
   apis: ["./src/routes/*.js"], // Specify the path to your route files
 };
 const specs = swaggerJsdoc(options);
+
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
-// Routes
-app.use("/", GoogleAuthRoutes);
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send("Something went wrong!");
+app.get("/", (req, res) => {
+  res.send("Jifunze Hub");
 });
+app.use('/', GoogleAuthRoutes)
 
-const PORT = process.env.PORT || 2500;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+
+
+app.listen(5000, () => console.log("App listening on port 5000"));
