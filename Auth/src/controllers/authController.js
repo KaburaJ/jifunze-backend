@@ -130,10 +130,10 @@ module.exports = {
           .input('UserPasswordHash', hashedPassword);
 
         const results = await request.execute('[dbo].[AddUser]');
-        console.log(results);
+        console.log("sdfghj",results);
         res.json({
           success: true,
-          message: 'Logged in successfully',
+          message: 'User added successfully',
           data: results[0].message
       });
 
