@@ -176,7 +176,8 @@ loginUser: async (req, res) => {
                     res.status(200).json({
                         success: true,
                         message: 'Logged in successfully',
-                        token: token
+                        token: token,
+                        data: result.recordset
                     });
                 } else {
                     res.status(401).json({
