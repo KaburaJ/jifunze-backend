@@ -2,10 +2,9 @@ const passport = require("passport");
 require("dotenv").config();
 const GoogleStrategy = require('passport-google-oauth2').Strategy;
 
-passport.use(new GoogleStrategy({
+const googleStrategy = new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   // clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: "https://jifunze-hub-google-signup.onrender.com/google/callback",
   passReqToCallback: true
 }, function(request, accessToken, refreshToken, profile, done) {
   const user = {
@@ -15,7 +14,11 @@ passport.use(new GoogleStrategy({
   };
 
   return done(null, user);
-}));
+});
+
+googleStrategy.setRedirectUri("");
+
+passport.use(googleStrategy);
 
 passport.serializeUser(function(user, done) {
   done(null, user);
