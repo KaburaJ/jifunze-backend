@@ -53,11 +53,13 @@
  *       401:
  *         description: Authentication failed
  */
+
 require('../config/auth.js')
 const express = require('express');
 const GoogleAuthRoutes = express.Router();
 const passport = require("passport");
 const mssql = require('mssql');
+const config = require('../config/dbConfig.js')
 
 GoogleAuthRoutes.get(
   "/auth/google",
