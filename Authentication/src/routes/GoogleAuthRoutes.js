@@ -16,15 +16,6 @@
  *         description: Successfully initiated OAuth
  */
 
-const express = require('express');
-const GoogleAuthRoutes = express.Router();
-const passport = require("passport");
-
-GoogleAuthRoutes.get(
-  "/auth/google",
-  passport.authenticate("google", { scope: ["email", "profile"] })
-);
-
 /**
  * @swagger
  * /google/callback:
@@ -37,38 +28,6 @@ GoogleAuthRoutes.get(
  *       401:
  *         description: Authentication failed
  */
-GoogleAuthRoutes.get("/google/callback", async (req, res, next) => {
-  passport.authenticate("google", async (err, user) => {
-    if (err || !user) {
-      res.redirect("/auth/failure");
-      return;
-    }
-
-    try {
-      const sql = await mssql.connect(config);
-      const request = new mssql.Request(sql);
-      request.input('FirstName', user.FirstName); 
-      request.input('LastName', user.LastName);
-      request.input('UserEmail', user.Email);
-      request.input('UserPasswordHash', null);
-
-      const result = await request.execute('[dbo].[JifunzeAddUser]');
-
-      if (result && result.rowsAffected && result.rowsAffected[0] > 0) {
-        res.status(200).json({
-          success: true,
-          message: 'User added and logged in successfully',
-          user: user 
-        });
-      } else {
-        res.redirect("/auth/failure");
-      }
-    } catch (error) {
-      console.error('Error adding user to database:', error);
-      res.redirect("/auth/failure");
-    }
-  })(req, res, next);
-});
 
 /**
  * @swagger
@@ -80,10 +39,6 @@ GoogleAuthRoutes.get("/google/callback", async (req, res, next) => {
  *       200:
  *         description: Authentication failed
  */
-GoogleAuthRoutes.get("/auth/failure", (req, res) => {
-  res.send("Something went wrong on our end");
-});
-
 /**
  * @swagger
  * /protected:
@@ -98,6 +53,54 @@ GoogleAuthRoutes.get("/auth/failure", (req, res) => {
  *       401:
  *         description: Authentication failed
  */
+
+const express = require('express');
+const GoogleAuthRoutes = express.Router();
+const passport = require("passport");
+const mssql = require('mssql');
+
+GoogleAuthRoutes.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["email", "profile"] })
+);
+
+GoogleAuthRoutes.get("/google/callback", async (req, res, next) => {
+  passport.authenticate("google", async (err, user) => {
+    if (err || !user) {
+      res.status(401).json({ success: false, message: 'Authentication failed' });
+      return;
+    }
+
+    try {
+      // Connect to the database
+      const sql = await mssql.connect(config);
+
+      // Call the stored procedure to add the user to the database
+      const request = new mssql.Request(sql);
+      request.input('FirstName', user.FirstName);
+      request.input('LastName', user.LastName);
+      request.input('UserEmail', user.Email);
+      // Assuming the UserPasswordHash is not available at this point
+      request.input('UserPasswordHash', null);
+      const result = await request.execute('[dbo].[AddUser]');
+
+      // Handle the response from the stored procedure
+      if (result && result.rowsAffected && result.rowsAffected[0] > 0) {
+        res.status(200).json({ success: true, message: 'User added successfully', user: user });
+      } else {
+        res.status(500).json({ success: false, message: 'Failed to add user to the database' });
+      }
+    } catch (error) {
+      console.error('Error adding user to the database:', error);
+      res.status(500).json({ success: false, message: 'An error occurred while adding user to the database' });
+    }
+  })(req, res, next);
+});
+
+GoogleAuthRoutes.get("/auth/failure", (req, res) => {
+  res.send("Something went wrong on our end");
+});
+
 const isLoggedIn = (req, res, next) => {
   req.user ? next() : res.sendStatus(401);
 };
