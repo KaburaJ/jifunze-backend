@@ -131,11 +131,7 @@ module.exports = {
 
         const results = await request.execute('[dbo].[AddUser]');
         console.log("sdfghj",results);
-        res.json({
-          success: true,
-          message: 'User added successfully',
-          data: results.recordset[0]
-      });
+        res.json(results.recordset[0]);
 
         console.log('CONNECTED AT SIGN UP');
         console.log('Received request body:', req.body);
