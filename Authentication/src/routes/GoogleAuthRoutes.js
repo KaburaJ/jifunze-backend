@@ -53,7 +53,7 @@
  *       401:
  *         description: Authentication failed
  */
-
+require('../config/auth.js')
 const express = require('express');
 const GoogleAuthRoutes = express.Router();
 const passport = require("passport");
@@ -80,11 +80,9 @@ GoogleAuthRoutes.get("/google/callback", async (req, res, next) => {
       request.input('FirstName', user.FirstName);
       request.input('LastName', user.LastName);
       request.input('UserEmail', user.Email);
-      // Assuming the UserPasswordHash is not available at this point
       request.input('UserPasswordHash', null);
       const result = await request.execute('[dbo].[AddUser]');
 
-      // Handle the response from the stored procedure
       if (result && result.rowsAffected && result.rowsAffected[0] > 0) {
         res.status(200).json({ success: true, message: 'User added successfully', user: user });
       } else {
