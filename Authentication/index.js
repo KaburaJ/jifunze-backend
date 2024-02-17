@@ -1,6 +1,3 @@
-require("./src/config/auth");
-require("dotenv").config();
-const GoogleAuthRoutes= require("./src/routes/GoogleAuthRoutes");
 const express = require("express");
 const session = require("express-session");
 const passport = require("passport");
@@ -8,13 +5,19 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerJsdoc = require("swagger-jsdoc");
 const cors = require("cors");
 const app = express();
+const GoogleAuthRoutes = require("./src/routes/GoogleAuthRoutes"); // Assuming this is where your routes are defined
+require("dotenv").config();
+
+// CORS configuration
+app.use(cors());
+
 app.use(
-  cors({
-    origin: "https://jifunze-hub-google-signup.onrender.com/",
-    credentials: true,
-    optionSuccessStatus: 200,
+  session({ 
+    secret: process.env.SECRET,
+    resave: false,
+    saveUninitialized: false
   })
-);app.use(session({ secret: process.env.SECRET }));
+);
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -37,8 +40,8 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 app.get("/", (req, res) => {
   res.send("Jifunze Hub");
 });
-app.use('/', GoogleAuthRoutes)
 
+app.use("/", GoogleAuthRoutes);
 
-
-app.listen(2500, () => console.log("App listening on port 5000"));
+const PORT = process.env.PORT || 2500; // Use the environment variable for port or default to 2500
+app.listen(PORT, () => console.log(`App listening on port ${PORT}`));
