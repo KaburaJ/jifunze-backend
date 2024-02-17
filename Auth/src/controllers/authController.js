@@ -134,7 +134,7 @@ module.exports = {
         res.json({
           success: true,
           message: 'User added successfully',
-          data: results[0].message
+          data: results[0]
       });
 
         console.log('CONNECTED AT SIGN UP');
