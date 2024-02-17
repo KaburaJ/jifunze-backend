@@ -133,7 +133,6 @@ module.exports = {
         res.json({
           success: true,
           message: 'Logged in successfully',
-          token: token,
           data: results.message
       });
 
