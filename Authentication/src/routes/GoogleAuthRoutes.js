@@ -37,7 +37,7 @@ GoogleAuthRoutes.get(
   passport.authenticate("google", { scope: ["email", "profile"] })
 );
 
-GoogleAuthRoutes.post("/auth/google/signup", async (req, res) => {
+GoogleAuthRoutes.get("/auth/google/signup", async (req, res) => {
   const userData = req.body; // Assuming the user data is sent in the request body
   
   try {
