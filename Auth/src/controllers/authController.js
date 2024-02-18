@@ -254,7 +254,6 @@ module.exports = {
       res.status(500).json({ success: false, message: "Logout error" });
     }
   },
-
   googleRegisterOrLoginUser: async (req, res) => {
     try {
       const { FirstName, LastName, UserEmail, UserPasswordHash } = req.body;
@@ -269,7 +268,7 @@ module.exports = {
       checkEmailRequest.input("LoginUserEmail", UserEmail);
       const checkEmailResult = await checkEmailRequest.execute("[dbo].[JifunzeUserLogin]");
   
-      console.log("checkEmailResult.recordset:", checkEmailResult.recordset); // Log the recordset
+      console.log("checkEmailResult.recordset:", checkEmailResult.recordset); 
   
       if (checkEmailResult.recordset.length > 0) {
         // User exists, attempt login
@@ -306,14 +305,11 @@ module.exports = {
         registerRequest.input("UserPasswordHash", hashedPassword);
         const registerResult = await registerRequest.execute("[dbo].[AddUser]");
   
-        // Retrieve the registered user's data
         const newUser = registerResult.recordset[0];
   
-        // Generate JWT token
         const userId = newUser.UserID;
         const token = jwt.sign({ userId }, "coco", { expiresIn: "1y" });
   
-        // Update AuthToken in the database
         const updateRequest = new mssql.Request(sql);
         updateRequest.input("UserId", userId);
         updateRequest.input("Token", token);
@@ -325,5 +321,5 @@ module.exports = {
       console.error("Google registration or login error:", error);
       res.status(500).json({ success: false, message: "Google registration or login error" });
     }
-  }
+  }  
 }  
