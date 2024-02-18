@@ -279,7 +279,8 @@ module.exports = {
         // if (!dbPassword) {
         //   return res.status(400).json({ success: false, message: "Invalid password hash" });
         // }
-  
+        if (dbPassword) {
+
         const passwordsMatch = await bcrypt.compare(UserPasswordHash, dbPassword);
   
         if (passwordsMatch) {
@@ -295,7 +296,10 @@ module.exports = {
         } else {
           res.status(401).json({ success: false, message: "Incorrect password" });
         }
-      } }else {
+      } 
+    }
+    }
+      else {
         // User doesn't exist, register them
         const hashedPassword = await bcrypt.hash(UserPasswordHash, 8);
         const registerRequest = new mssql.Request(sql);
