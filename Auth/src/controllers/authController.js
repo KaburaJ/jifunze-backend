@@ -214,7 +214,7 @@ logoutUser: async (req, res) => {
       if (sql.connected) {
           const request = new mssql.Request(sql);
           request.input('UserId', userId);
-          await request.query('UPDATE [dbo].[Users] SET Token = NULL WHERE UserID = @UserId');
+          await request.query('UPDATE [dbo].[Users] SET AuthToken = NULL WHERE UserID = @UserId');
 
           res.status(200).json({ success: true, message: 'Logout successful' });
       } else {
