@@ -274,6 +274,7 @@ module.exports = {
   
       if (checkEmailResult.recordset.length > 0) {
         const result = checkEmailResult.recordset[0];
+        console.log("check result", result);
         const dbPassword = result.UserPasswordHash;
   
         // if (!dbPassword) {
