@@ -267,12 +267,8 @@ module.exports = {
 
       if (checkEmailResult.recordset.length > 0) {
         try {
-          const { error, value } = loginSchema.validate(req.body);
-          if (error) {
-            return res.status(400).json({ error: error.details[0].message });
-          }
     
-          const user = value;
+          const user = req.body;
           const sql = await mssql.connect(config);
     
           if (sql.connected) {
