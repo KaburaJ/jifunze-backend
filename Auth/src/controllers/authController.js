@@ -71,7 +71,7 @@
 /**
  * @swagger
  * /user/logout/{userId}:
- *   post:
+ *   get:
  *     summary: Logout a user
  *     tags: [Authentication]
  *     parameters:
