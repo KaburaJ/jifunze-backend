@@ -45,6 +45,28 @@
 
 /**
  * @swagger
+ * /user/google/auth:
+ *   post:
+ *     summary: Register or Log In a new user using Google
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       200:
+ *         description: User Google registration successful
+ *       400:
+ *         description: Bad request or validation error
+ *       500:
+ *         description: Internal server error
+ */
+
+
+/**
+ * @swagger
  * /user/login:
  *   post:
  *     summary: Login a user
@@ -224,6 +246,52 @@ logoutUser: async (req, res) => {
       console.error('Logout error:', error);
       res.status(500).json({ success: false, message: 'Logout error' });
   }
-}
+},
 
+googleRegisterOrLoginUser: async (req, res) => {
+    try {
+        const { FirstName, LastName, UserEmail, UserPasswordHash } = req.body;
+
+        const checkEmailRequest = new mssql.Request(sql);
+        checkEmailRequest.input('LoginUserEmail', UserEmail);
+        const checkEmailResult = await checkEmailRequest.execute('[dbo].[JifunzeUserLogin]');
+
+        if (checkEmailResult.recordset.length > 0) {
+            const dbPassword = checkEmailResult.recordset[0].UserPasswordHash;
+            const passwordsMatch = await bcrypt.compare(UserPasswordHash, dbPassword);
+
+            if (passwordsMatch) {
+                const userId = checkEmailResult.recordset[0].UserId; 
+                const token = jwt.sign({ userId }, 'coco', { expiresIn: '1h' }); 
+
+                res.status(200).json({
+                    success: true,
+                    token: token,
+                    data: checkEmailResult.recordset
+                });
+            } else {
+                res.status(401).json({
+                    success: false,
+                    message: 'Incorrect password',
+                });
+            }
+        } else {
+
+            const registerRequest = new mssql.Request(sql);
+            registerRequest.input('FirstName', FirstName);
+            registerRequest.input('LastName', LastName);
+            registerRequest.input('UserEmail', UserEmail);
+            registerRequest.input('UserPasswordHash', UserPasswordHash);
+            const registerResult = await registerRequest.execute('[dbo].[AddUser]');
+
+            res.status(200).json({
+                success: true,
+                message: registerResult.recordset[0].Message,
+            });
+        }
+    } catch (error) {
+        console.error('Registration or login error:', error);
+        res.status(500).json({ success: false, message: 'Registration or login error' });
+    }
+}
 }

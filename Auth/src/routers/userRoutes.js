@@ -62,6 +62,27 @@
 
 /**
  * @swagger
+ * /user/google/auth:
+ *   post:
+ *     summary: Register or Log In a new user using Google
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       200:
+ *         description: User Google registration successful
+ *       400:
+ *         description: Bad request or validation error
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
  * /user/login:
  *   post:
  *     summary: Login a user
@@ -104,12 +125,13 @@
  */
 
 const express = require('express');
-const { registerUser, loginUser, logoutUser } = require('../controllers/authController');
+const { registerUser, loginUser, logoutUser, googleRegisterOrLoginUser } = require('../controllers/authController');
 const userRoutes = express.Router();
 
 userRoutes.post('/user/signup', registerUser);
 userRoutes.post('/user/login', loginUser);
 userRoutes.get('/user/logout/:userId', logoutUser);
+userRoutes.post('/user/google/auth', googleRegisterOrLoginUser)
 
 
 module.exports = userRoutes;
