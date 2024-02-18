@@ -182,7 +182,7 @@ loginUser: async (req, res) => {
                   const updateRequest = new mssql.Request(sql);
                   updateRequest.input('UserId', userId);
                   updateRequest.input('Token', token);
-                  await updateRequest.query('UPDATE [dbo].[Users] SET Token = @Token WHERE UserID = @UserId');
+                  await updateRequest.query('UPDATE [dbo].[Users] SET AuthToken = @Token WHERE UserID = @UserId');
 
                   res.status(200).json({
                       success: true,
