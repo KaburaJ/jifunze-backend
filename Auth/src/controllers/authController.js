@@ -258,11 +258,12 @@ module.exports = {
     try {
       const { FirstName, LastName, UserEmail, UserPasswordHash } = req.body;
   
-      console.log("first", FirstName);
-      // Check if required fields are provided
-      if (!UserEmail || !UserPasswordHash) {
-        return res.status(400).json({ success: false, message: "UserEmail and UserPasswordHash are required" });
-      }
+      if(UserEmail && UserPasswordHash){
+      // console.log("first", FirstName);
+      // // Check if required fields are provided
+      // if (!UserEmail || !UserPasswordHash) {
+      //   return res.status(400).json({ success: false, message: "UserEmail and UserPasswordHash are required" });
+      // }
   
       const sql = await mssql.connect(config);
       const checkEmailRequest = new mssql.Request(sql);
@@ -272,14 +273,12 @@ module.exports = {
       console.log("checkEmailResult.recordset:", checkEmailResult.recordset); 
   
       if (checkEmailResult.recordset.length > 0) {
-        // User exists, attempt login
         const result = checkEmailResult.recordset[0];
         const dbPassword = result.UserPasswordHash;
   
-        // Check if UserPasswordHash is provided and valid
-        if (!dbPassword) {
-          return res.status(400).json({ success: false, message: "Invalid password hash" });
-        }
+        // if (!dbPassword) {
+        //   return res.status(400).json({ success: false, message: "Invalid password hash" });
+        // }
   
         const passwordsMatch = await bcrypt.compare(UserPasswordHash, dbPassword);
   
@@ -296,7 +295,7 @@ module.exports = {
         } else {
           res.status(401).json({ success: false, message: "Incorrect password" });
         }
-      } else {
+      } }else {
         // User doesn't exist, register them
         const hashedPassword = await bcrypt.hash(UserPasswordHash, 8);
         const registerRequest = new mssql.Request(sql);
