@@ -261,103 +261,55 @@ module.exports = {
       const sql = await mssql.connect(config);
       const checkEmailRequest = new mssql.Request(sql);
       checkEmailRequest.input("LoginUserEmail", UserEmail);
-      const checkEmailResult = await checkEmailRequest.execute(
-        "[dbo].[JifunzeUserLogin]"
-      );
-
+      const checkEmailResult = await checkEmailRequest.execute("[dbo].[JifunzeUserLogin]");
+  
       if (checkEmailResult.recordset.length > 0) {
-        try {
-    
-          const user = req.body;
-          const sql = await mssql.connect(config);
-    
-          if (sql.connected) {
-            const request = new mssql.Request(sql);
-            request.input("LoginUserEmail", user.UserEmail);
-    
-            const result = await request.execute("[dbo].[JifunzeUserLogin]");
-    
-            if (result.recordset.length > 0) {
-              const dbPassword = result.recordset[0].UserPasswordHash;
-              const passwordsMatch = await bcrypt.compare(
-                user.UserPasswordHash,
-                dbPassword
-              );
-    
-              if (passwordsMatch) {
-                const userId = result.recordset[0].UserID;
-                const token = jwt.sign({ userId }, "coco", { expiresIn: "1y" });
-    
-                const updateRequest = new mssql.Request(sql);
-                updateRequest.input("UserId", userId);
-                updateRequest.input("Token", token);
-                await updateRequest.query(
-                  "UPDATE [dbo].[Users] SET AuthToken = @token WHERE UserID = @UserId"
-                );
-    
-                res.status(200).json({
-                  success: true,
-                  token: token,
-                  data: result.recordset,
-                });
-              } else {
-                res.status(401).json({
-                  success: false,
-                  message: "Incorrect password",
-                });
-              }
-            } else {
-              res.status(404).json({ success: false, message: "No user found" });
-            }
-          } else {
-            res
-              .status(500)
-              .json({ success: false, message: "Database connection error" });
-          }
-        } catch (error) {
-          console.error("Login error:", error);
-          res.status(500).json({ success: false, message: "Login error" });
+        // User exists, attempt login
+        const result = checkEmailResult.recordset[0];
+        const dbPassword = result.UserPasswordHash;
+        const passwordsMatch = await bcrypt.compare(UserPasswordHash, dbPassword);
+  
+        if (passwordsMatch) {
+          const userId = result.UserID;
+          const token = jwt.sign({ userId }, "coco", { expiresIn: "1y" });
+  
+          const updateRequest = new mssql.Request(sql);
+          updateRequest.input("UserId", userId);
+          updateRequest.input("Token", token);
+          await updateRequest.query("UPDATE [dbo].[Users] SET AuthToken = @token WHERE UserID = @UserId");
+  
+          res.status(200).json({ success: true, token: token, data: result });
+        } else {
+          res.status(401).json({ success: false, message: "Incorrect password" });
         }
       } else {
-        console.log(process.env.DB_USER);
-        try {
-          const user = req.body;
-          const hashedPassword = await bcrypt.hash(user.UserPasswordHash, 8);
-    
-          const sql = await mssql.connect(config);
-    
-          if (sql.connected) {
-            const request = new mssql.Request(sql);
-            request
-              .input("FirstName", user.FirstName)
-              .input("LastName", user.LastName)
-              .input("UserEmail", user.UserEmail)
-              .input("UserPasswordHash", hashedPassword);
-    
-            const results = await request.execute("[dbo].[AddUser]");
-            console.log("sdfghj", results);
-            res.json(results.recordset[0]);
-    
-            console.log("CONNECTED AT SIGN UP");
-            console.log("Received request body:", req.body);
-            console.log("Hashed Password:", hashedPassword);
-            console.log("Parameters sent to stored procedure:", {
-              FirstName: user.FirstName,
-              LastName: user.LastName,
-              UserEmail: user.UserEmail,
-              UserPasswordHash: hashedPassword,
-            });
-          }
-        } catch (e) {
-          console.error(e);
-          res.status(500).send("An error occurred when registering a user");
-        }
+        // User doesn't exist, register them
+        const hashedPassword = await bcrypt.hash(UserPasswordHash, 8);
+        const registerRequest = new mssql.Request(sql);
+        registerRequest.input("FirstName", FirstName);
+        registerRequest.input("LastName", LastName);
+        registerRequest.input("UserEmail", UserEmail);
+        registerRequest.input("UserPasswordHash", hashedPassword);
+        const registerResult = await registerRequest.execute("[dbo].[AddUser]");
+  
+        // Retrieve the registered user's data
+        const newUser = registerResult.recordset[0];
+  
+        // Generate JWT token
+        const userId = newUser.UserID;
+        const token = jwt.sign({ userId }, "coco", { expiresIn: "1y" });
+  
+        // Update AuthToken in the database
+        const updateRequest = new mssql.Request(sql);
+        updateRequest.input("UserId", userId);
+        updateRequest.input("Token", token);
+        await updateRequest.query("UPDATE [dbo].[Users] SET AuthToken = @token WHERE UserID = @UserId");
+  
+        res.status(200).json({ success: true, token: token, data: newUser });
       }
     } catch (error) {
-      console.error("Registration or login error:", error);
-      res
-        .status(500)
-        .json({ success: false, message: "Registration or login error" });
+      console.error("Google registration or login error:", error);
+      res.status(500).json({ success: false, message: "Google registration or login error" });
     }
-  },
+  }  
 };
