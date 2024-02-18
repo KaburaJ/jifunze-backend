@@ -70,17 +70,22 @@
 
 /**
  * @swagger
- * /protected:
- *   get:
- *     summary: Protected route
- *     description: Displays a message for authenticated users
- *     security:
- *       - BearerAuth: []
+ * /user/logout/{userId}:
+ *   post:
+ *     summary: Logout a user
+ *     tags: [Authentication]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the user to logout
  *     responses:
  *       200:
- *         description: Successfully authenticated
- *       401:
- *         description: Authentication failed
+ *         description: Logout successful
+ *       500:
+ *         description: Database connection error or internal server error
  */
 
 
@@ -151,49 +156,74 @@ module.exports = {
   },
 
 loginUser: async (req, res) => {
-    try {
-        const { error, value } = loginSchema.validate(req.body);
-        if (error) {
-            return res.status(400).json({ error: error.details[0].message });
-        }
+  try {
+      const { error, value } = loginSchema.validate(req.body);
+      if (error) {
+          return res.status(400).json({ error: error.details[0].message });
+      }
 
-        const user = value;
-        const sql = await mssql.connect(config);
+      const user = value;
+      const sql = await mssql.connect(config);
 
-        if (sql.connected) {
-            const request = new mssql.Request(sql);
-            request.input('LoginUserEmail', user.UserEmail);
+      if (sql.connected) {
+          const request = new mssql.Request(sql);
+          request.input('LoginUserEmail', user.UserEmail);
 
-            const result = await request.execute('[dbo].[JifunzeUserLogin]');
+          const result = await request.execute('[dbo].[JifunzeUserLogin]');
 
-            if (result.recordset.length > 0) {
-                const dbPassword = result.recordset[0].UserPasswordHash;
-                const passwordsMatch = await bcrypt.compare(user.UserPasswordHash, dbPassword);
+          if (result.recordset.length > 0) {
+              const dbPassword = result.recordset[0].UserPasswordHash;
+              const passwordsMatch = await bcrypt.compare(user.UserPasswordHash, dbPassword);
 
-                if (passwordsMatch) {
-                    const userId = result.recordset[0].UserId; 
-                    const token = jwt.sign({ userId }, 'coco', { expiresIn: '1h' }); 
+              if (passwordsMatch) {
+                  const userId = result.recordset[0].UserId; 
+                  const token = jwt.sign({ userId }, 'coco', { expiresIn: '1y' }); 
 
-                    res.status(200).json({
-                        success: true,
-                        token: token,
-                        data: result.recordset
-                    });
-                } else {
-                    res.status(401).json({
-                        success: false,
-                        message: 'Incorrect password',
-                    });
-                }
-            } else {
-                res.status(404).json({ success: false, message: 'No user found' });
-            }
-        } else {
-            res.status(500).json({ success: false, message: 'Database connection error' });
-        }
-    } catch (error) {
-        console.error('Login error:', error);
-        res.status(500).json({ success: false, message: 'Login error' });
-    }
+                  const updateRequest = new mssql.Request(sql);
+                  updateRequest.input('UserId', userId);
+                  updateRequest.input('Token', token);
+                  await updateRequest.query('UPDATE [dbo].[Users] SET Token = @Token WHERE UserID = @UserId');
+
+                  res.status(200).json({
+                      success: true,
+                      token: token,
+                      data: result.recordset
+                  });
+              } else {
+                  res.status(401).json({
+                      success: false,
+                      message: 'Incorrect password',
+                  });
+              }
+          } else {
+              res.status(404).json({ success: false, message: 'No user found' });
+          }
+      } else {
+          res.status(500).json({ success: false, message: 'Database connection error' });
+      }
+  } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ success: false, message: 'Login error' });
   }
+},
+logoutUser: async (req, res) => {
+  try {
+      const userId = req.params.userId; 
+      
+      const sql = await mssql.connect(config);
+      if (sql.connected) {
+          const request = new mssql.Request(sql);
+          request.input('UserId', userId);
+          await request.query('UPDATE [dbo].[Users] SET Token = NULL WHERE UserID = @UserId');
+
+          res.status(200).json({ success: true, message: 'Logout successful' });
+      } else {
+          res.status(500).json({ success: false, message: 'Database connection error' });
+      }
+  } catch (error) {
+      console.error('Logout error:', error);
+      res.status(500).json({ success: false, message: 'Logout error' });
+  }
+}
+
 }

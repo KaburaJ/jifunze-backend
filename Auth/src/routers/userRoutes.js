@@ -83,11 +83,33 @@
  *         description: Internal server error
  */
 
+/**
+ * @swagger
+ * /user/logout/{userId}:
+ *   post:
+ *     summary: Logout a user
+ *     tags: [Authentication]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the user to logout
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ *       500:
+ *         description: Database connection error or internal server error
+ */
+
 const express = require('express');
-const { registerUser, loginUser } = require('../controllers/authController');
+const { registerUser, loginUser, logoutUser } = require('../controllers/authController');
 const userRoutes = express.Router();
 
 userRoutes.post('/user/signup', registerUser);
 userRoutes.post('/user/login', loginUser);
+userRoutes.get('/user/logout/:userId', logoutUser);
+
 
 module.exports = userRoutes;
