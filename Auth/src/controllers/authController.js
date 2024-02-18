@@ -321,11 +321,6 @@ module.exports = {
       } else {
         console.log(process.env.DB_USER);
         try {
-          const { error, value } = userSchema.validate(req.body);
-          if (error) {
-            return res.status(400).json({ error: error.details[0].message });
-          }
-    
           const user = req.body;
           const hashedPassword = await bcrypt.hash(user.UserPasswordHash, 8);
     
