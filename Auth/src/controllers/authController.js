@@ -176,7 +176,7 @@ loginUser: async (req, res) => {
               const passwordsMatch = await bcrypt.compare(user.UserPasswordHash, dbPassword);
 
               if (passwordsMatch) {
-                  const userId = result.recordset[0].UserId; 
+                  const userId = result.recordset[0].UserID; 
                   const token = jwt.sign({ userId }, 'coco', { expiresIn: '1y' }); 
 
                   const updateRequest = new mssql.Request(sql);
