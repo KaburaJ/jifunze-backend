@@ -8,5 +8,12 @@ const userSchema = Joi.object({
     UserCPassword: Joi.string().valid(Joi.ref('UserPasswordHash')).required(),
 }).with('UserPasswordHash', 'UserCPassword');
 
+const googleUserSchema = Joi.object({
+    FirstName: Joi.string().required(),
+    LastName: Joi.string().required(),
+    UserEmail: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }).required(),
+    UserPasswordHash: Joi.string().min(6).required(), 
+});
 
-module.exports = userSchema;
+
+module.exports = userSchema,googleUserSchema;
