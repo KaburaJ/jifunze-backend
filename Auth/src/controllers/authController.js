@@ -269,6 +269,8 @@ module.exports = {
       checkEmailRequest.input("LoginUserEmail", UserEmail);
       const checkEmailResult = await checkEmailRequest.execute("[dbo].[JifunzeUserLogin]");
   
+      console.log("checkEmailResult.recordset:", checkEmailResult.recordset); // Log the recordset
+  
       if (checkEmailResult.recordset.length > 0) {
         // User exists, attempt login
         const result = checkEmailResult.recordset[0];
@@ -323,5 +325,5 @@ module.exports = {
       console.error("Google registration or login error:", error);
       res.status(500).json({ success: false, message: "Google registration or login error" });
     }
-  }  
-};
+  }
+}  
