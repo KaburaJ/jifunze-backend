@@ -258,6 +258,7 @@ module.exports = {
     try {
       const { FirstName, LastName, UserEmail, UserPasswordHash } = req.body;
   
+      console.log("first", FirstName);
       // Check if required fields are provided
       if (!UserEmail || !UserPasswordHash) {
         return res.status(400).json({ success: false, message: "UserEmail and UserPasswordHash are required" });
