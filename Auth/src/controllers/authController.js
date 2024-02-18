@@ -258,6 +258,12 @@ module.exports = {
   googleRegisterOrLoginUser: async (req, res) => {
     try {
       const { FirstName, LastName, UserEmail, UserPasswordHash } = req.body;
+  
+      // Check if required fields are provided
+      if (!UserEmail || !UserPasswordHash) {
+        return res.status(400).json({ success: false, message: "UserEmail and UserPasswordHash are required" });
+      }
+  
       const sql = await mssql.connect(config);
       const checkEmailRequest = new mssql.Request(sql);
       checkEmailRequest.input("LoginUserEmail", UserEmail);
@@ -267,6 +273,12 @@ module.exports = {
         // User exists, attempt login
         const result = checkEmailResult.recordset[0];
         const dbPassword = result.UserPasswordHash;
+  
+        // Check if UserPasswordHash is provided and valid
+        if (!dbPassword) {
+          return res.status(400).json({ success: false, message: "Invalid password hash" });
+        }
+  
         const passwordsMatch = await bcrypt.compare(UserPasswordHash, dbPassword);
   
         if (passwordsMatch) {
