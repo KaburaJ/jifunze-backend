@@ -125,13 +125,13 @@
  */
 
 const express = require('express');
-const { registerUser, loginUser, logoutUser, googleRegisterOrLoginUser } = require('../controllers/authController');
+const { registerUser, loginUser, logoutUser, registerOrLoginUser } = require('../controllers/authController');
 const userRoutes = express.Router();
 
 userRoutes.post('/user/signup', registerUser);
 userRoutes.post('/user/login', loginUser);
 userRoutes.get('/user/logout/:userId', logoutUser);
-userRoutes.post('/user/google/auth', googleRegisterOrLoginUser)
+userRoutes.post('/user/google/auth', registerOrLoginUser)
 
 
 module.exports = userRoutes;
