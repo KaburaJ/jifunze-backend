@@ -293,6 +293,7 @@ module.exports = {
           registerRequest.input("UserPasswordHash", hashedPassword);
           const registerResult = await registerRequest.execute("[dbo].[AddUser]");
   
+          console.log("register result", registerResult);
           const newUser = registerResult.recordset[0];
           const userId = newUser.UserID;
           const token = jwt.sign({ userId }, "coco", { expiresIn: "1y" });
@@ -305,7 +306,6 @@ module.exports = {
           res.status(200).json({ success: true, token: token, data: newUser });
         }
       } else {
-        // Handle invalid request
         res.status(400).json({ success: false, message: "UserEmail and UserPasswordHash are required" });
       }
     } catch (error) {
