@@ -296,6 +296,7 @@ module.exports = {
           console.log("register result", registerResult);
           if(registerResult){
             const newUser = registerResult.recordset[0];
+            console.log(newUser);
             const userId = newUser.UserID;
             const token = jwt.sign({ userId }, "cocomelon", { expiresIn: "1y" });
     
@@ -305,6 +306,8 @@ module.exports = {
             await updateRequest.query("UPDATE [dbo].[Users] SET AuthToken = @token WHERE UserID = @userId");
             res.status(200).json({ success: true, token: token, data: newUser });
 
+          }else{
+            res.status(400).json({ success: false, message: "Registration invalid" });
           }
           
         }
