@@ -258,7 +258,7 @@ module.exports = {
     try {
       const { FirstName, LastName, UserEmail, UserPasswordHash } = req.body;
   
-      if (FirstName&LastName&UserEmail&UserPasswordHash) {
+      if (FirstName&&LastName&&UserEmail&&UserPasswordHash) {
         const sql = await mssql.connect(config);
         const checkEmailRequest = new mssql.Request(sql);
         checkEmailRequest.input("LoginUserEmail", UserEmail);
