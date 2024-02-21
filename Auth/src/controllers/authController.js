@@ -256,58 +256,91 @@ module.exports = {
       res.status(500).json({ success: false, message: "Logout error" });
     }
   },
-registerOrLoginUser: async (req, res) => {
+  registerOrLoginUser: async (req, res) => {
     try {
-        const { FirstName, LastName, UserEmail, UserPasswordHash } = req.body;
+      const { FirstName, LastName, UserEmail, UserPasswordHash } = req.body;
 
-        if (!(FirstName && LastName && UserEmail && UserPasswordHash)) {
-            return res.status(400).json({ success: false, message: "All fields are required" });
-        }
+      if (!(FirstName && LastName && UserEmail && UserPasswordHash)) {
+        return res
+          .status(400)
+          .json({ success: false, message: "All fields are required" });
+      }
 
-        const sql = await mssql.connect(config);
+      const sql = await mssql.connect(config);
+      const checkEmailRequest = new mssql.Request(sql);
+      checkEmailRequest.input("LoginUserEmail", UserEmail);
+      const checkEmailResult = await checkEmailRequest.execute(
+        "[dbo].[JifunzeUserLogin]"
+      );
+
+      if (checkEmailResult.recordset.length > 0) {
+        const result = checkEmailResult.recordset[0];
+        const userId = result.UserID;
+        const token = jwt.sign({ userId }, "cocomelon", { expiresIn: "1y" });
+
+        // Automatically log in the user without password comparison
+        const updateRequest = new mssql.Request(sql);
+        updateRequest.input("UserId", userId);
+        updateRequest.input("Token", token);
+        await updateRequest.query(
+          "UPDATE [dbo].[Users] SET AuthToken = @token WHERE UserID = @UserId"
+        );
+
+        return res
+          .status(200)
+          .json({ success: true, token: token, data: result });
+      }
+
+      const hashedPassword = await bcrypt.hash(UserPasswordHash, 8);
+      const registerRequest = new mssql.Request(sql);
+      registerRequest.input("FirstName", FirstName);
+      registerRequest.input("LastName", LastName);
+      registerRequest.input("UserEmail", UserEmail);
+      registerRequest.input("UserPasswordHash", hashedPassword);
+      const registerResult = await registerRequest.execute(
+        "INSERT INTO [db0].[Users] (FirstName, LastName, UserEmail, UserPasswordHash) VALUES (@FirstName, @LastName, @UserEmail, @hashedPassword);"
+      );
+
+      if (registerResult.recordset && registerResult.recordset.length > 0) {
+        const newUser = registerResult.recordset[0];
+        const userId = newUser.UserID;
+        const token = jwt.sign({ userId }, "cocomelon", { expiresIn: "1y" });
+
         const checkEmailRequest = new mssql.Request(sql);
         checkEmailRequest.input("LoginUserEmail", UserEmail);
-        const checkEmailResult = await checkEmailRequest.execute("[dbo].[JifunzeUserLogin]");
+        const checkEmailResult = await checkEmailRequest.execute(
+          "[dbo].[JifunzeUserLogin]"
+        );
 
         if (checkEmailResult.recordset.length > 0) {
-            const result = checkEmailResult.recordset[0];
-            const userId = result.UserID;
-            const token = jwt.sign({ userId }, "cocomelon", { expiresIn: "1y" });
-            
-            // Automatically log in the user without password comparison
-            const updateRequest = new mssql.Request(sql);
-            updateRequest.input("UserId", userId);
-            updateRequest.input("Token", token);
-            await updateRequest.query("UPDATE [dbo].[Users] SET AuthToken = @token WHERE UserID = @UserId");
+          const result = checkEmailResult.recordset[0];
+          const userId = result.UserID;
+          const token = jwt.sign({ userId }, "cocomelon", { expiresIn: "1y" });
 
-            return res.status(200).json({ success: true, token: token, data: result });
+          // Automatically log in the user without password comparison
+          const updateRequest = new mssql.Request(sql);
+          updateRequest.input("UserId", userId);
+          updateRequest.input("Token", token);
+          await updateRequest.query(
+            "UPDATE [dbo].[Users] SET AuthToken = @token WHERE UserID = @UserId"
+          );
+
+          return res
+            .status(200)
+            .json({ success: true, token: token, data: result });
         }
 
-        const hashedPassword = await bcrypt.hash(UserPasswordHash, 8);
-        const registerRequest = new mssql.Request(sql);
-        registerRequest.input("FirstName", FirstName);
-        registerRequest.input("LastName", LastName);
-        registerRequest.input("UserEmail", UserEmail);
-        registerRequest.input("UserPasswordHash", hashedPassword);
-        const registerResult = await registerRequest.execute("INSERT INTO [db0].[Users] (FirstName, LastName, UserEmail, UserPasswordHash) VALUES (@FirstName, @LastName, @UserEmail, @hashedPassword);");
-
-        if (registerResult.recordset && registerResult.recordset.length > 0) {
-            const newUser = registerResult.recordset[0];
-            const userId = newUser.UserID;
-            const token = jwt.sign({ userId }, "cocomelon", { expiresIn: "1y" });
-
-            const updateRequest = new mssql.Request(sql);
-            updateRequest.input("UserId", userId);
-            updateRequest.input("Token", token);
-            await updateRequest.query("UPDATE [dbo].[Users] SET AuthToken = @token WHERE UserID = @userId");
-
-            return res.status(200).json({ success: true, token: token, data: newUser });
-        } else {
-            return res.status(400).json({ success: false, message: "Registration failed" });
-        }
+        return res
+          .status(200)
+          .json({ success: true, token: token, data: newUser });
+      } else {
+        return res
+          .status(400)
+          .json({ success: false, message: "Registration failed" });
+      }
     } catch (error) {
-        console.error("Error:", error);
-        return res.status(500).json({ success: false, message: "Server error" });
+      console.error("Error:", error);
+      return res.status(500).json({ success: false, message: "Server error" });
     }
-}
+  },
 };
