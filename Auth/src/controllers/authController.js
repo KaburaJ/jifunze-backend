@@ -290,8 +290,9 @@ module.exports = {
                 updateRequest.input("UserId", userId);
                 updateRequest.input("Token", token);
                 await updateRequest.query("UPDATE [dbo].[Users] SET AuthToken = @token WHERE UserID = @userId");
+                const userDataDisplay = await updateRequest.query("SELECT * FROM Users WHERE UserEmail = @UserEmail");
 
-                return res.status(200).json({ success: true, token: token, data: newUser });
+                return res.status(200).json({ success: true, token: token, data: userDataDisplay });
             } else {
                 return res.status(400).json({ success: false, message: "Registration failed" });
             }
