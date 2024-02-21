@@ -258,84 +258,61 @@ module.exports = {
   },
   registerOrLoginUser: async (req, res) => {
     try {
-      const { FirstName, LastName, UserEmail, UserPasswordHash } = req.body;
+        const { FirstName, LastName, UserEmail, UserPasswordHash } = req.body;
 
-      if (!(FirstName && LastName && UserEmail && UserPasswordHash)) {
-        return res
-          .status(400)
-          .json({ success: false, message: "All fields are required" });
-      }
-
-      const sql = await mssql.connect(config);
-      const checkEmailRequest = new mssql.Request(sql);
-      checkEmailRequest.input("LoginUserEmail", UserEmail);
-      const checkEmailResult = await checkEmailRequest.execute(
-        "[dbo].[JifunzeUserLogin]"
-      );
-
-      if (checkEmailResult.recordset.length > 0) {
-        const result = checkEmailResult.recordset[0];
-        const userId = result.UserID;
-        const token = jwt.sign({ userId }, "cocomelon", { expiresIn: "1y" });
-
-        // Automatically log in the user without password comparison
-        const updateRequest = new mssql.Request(sql);
-        updateRequest.input("UserId", userId);
-        updateRequest.input("Token", token);
-        await updateRequest.query(
-          "UPDATE [dbo].[Users] SET AuthToken = @token WHERE UserID = @UserId"
-        );
-
-        return res
-          .status(200)
-          .json({ success: true, token: token, data: result });
-      }
-      
-      const hashedPassword = await bcrypt.hash(UserPasswordHash, 8);
-      const registerRequest = new mssql.Request(sql);
-      registerRequest.input("FirstName", FirstName);
-      registerRequest.input("LastName", LastName);
-      registerRequest.input("UserEmail", UserEmail);
-      registerRequest.input("UserPasswordHash", hashedPassword);
-      const registerResult = await registerRequest.execute(
-        "INSERT INTO [db0].[Users] (FirstName, LastName, UserEmail, UserPasswordHash) VALUES (@FirstName, @LastName, @UserEmail, @hashedPassword);"
-      );
-
-      if (registerResult.recordset && registerResult.recordset.length > 0) {
-        const checkEmailRequest = new mssql.Request(sql);
-        checkEmailRequest.input("LoginUserEmail", UserEmail);
-        const checkEmailResult = await checkEmailRequest.execute(
-          "[dbo].[JifunzeUserLogin]"
-        );
-
-        if (checkEmailResult.recordset.length > 0) {
-          const result = checkEmailResult.recordset[0];
-          const userId = result.UserID;
-          const token = jwt.sign({ userId }, "cocomelon", { expiresIn: "1y" });
-
-          const updateRequest = new mssql.Request(sql);
-          updateRequest.input("UserId", userId);
-          updateRequest.input("Token", token);
-          await updateRequest.query(
-            "UPDATE [dbo].[Users] SET AuthToken = @token WHERE UserID = @UserId"
-          );
-
-          return res
-            .status(200)
-            .json({ success: true, token: token, data: result });
+        if (!(FirstName && LastName && UserEmail && UserPasswordHash)) {
+            return res.status(400).json({ success: false, message: "All fields are required" });
         }
 
-        return res
-          .status(200)
-          .json({ success: true, token: token, data: newUser });
-      } else {
-        return res
-          .status(400)
-          .json({ success: false, message: "Registration failed" });
-      }
+        const sql = await mssql.connect(config);
+        const checkEmailRequest = new mssql.Request(sql);
+        checkEmailRequest.input("LoginUserEmail", UserEmail);
+        const checkEmailResult = await checkEmailRequest.execute("[dbo].[JifunzeUserLogin]");
+
+        const loginMessage = checkEmailResult.recordset[0].Message;
+
+        if (loginMessage === "User does not exist.") {
+            // User does not exist, proceed with registration
+            const hashedPassword = await bcrypt.hash(UserPasswordHash, 8);
+            const registerRequest = new mssql.Request(sql);
+            registerRequest.input("FirstName", FirstName);
+            registerRequest.input("LastName", LastName);
+            registerRequest.input("UserEmail", UserEmail);
+            registerRequest.input("UserPasswordHash", hashedPassword);
+            const registerResult = await registerRequest.execute("[dbo].[AddUser]");
+
+            if (registerResult.recordset && registerResult.recordset.length > 0) {
+                const newUser = registerResult.recordset[0];
+                const userId = newUser.UserID;
+                const token = jwt.sign({ userId }, "cocomelon", { expiresIn: "1y" });
+
+                const updateRequest = new mssql.Request(sql);
+                updateRequest.input("UserId", userId);
+                updateRequest.input("Token", token);
+                await updateRequest.query("UPDATE [dbo].[Users] SET AuthToken = @token WHERE UserID = @userId");
+
+                return res.status(200).json({ success: true, token: token, data: newUser });
+            } else {
+                return res.status(400).json({ success: false, message: "Registration failed" });
+            }
+        } else if (loginMessage === "Login successful.") {
+            // User exists, automatically log them in
+            const userData = checkEmailResult.recordset[0];
+            const userId = userData.UserID;
+            const token = jwt.sign({ userId }, "cocomelon", { expiresIn: "1y" });
+
+            const updateRequest = new mssql.Request(sql);
+            updateRequest.input("UserId", userId);
+            updateRequest.input("Token", token);
+            await updateRequest.query("UPDATE [dbo].[Users] SET AuthToken = @token WHERE UserID = @UserId");
+
+            return res.status(200).json({ success: true, token: token, data: userData });
+        } else {
+            return res.status(500).json({ success: false, message: "Unexpected response from login procedure" });
+        }
     } catch (error) {
-      console.error("Error:", error);
-      return res.status(500).json({ success: false, message: "Server error" });
+        console.error("Error:", error);
+        return res.status(500).json({ success: false, message: "Server error" });
     }
-  },
+}
 };
