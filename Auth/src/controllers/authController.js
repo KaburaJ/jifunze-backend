@@ -271,26 +271,16 @@ registerOrLoginUser: async (req, res) => {
 
         if (checkEmailResult.recordset.length > 0) {
             const result = checkEmailResult.recordset[0];
-            const dbPassword = result.UserPasswordHash;
+            const userId = result.UserID;
+            const token = jwt.sign({ userId }, "cocomelon", { expiresIn: "1y" });
+            
+            // Automatically log in the user without password comparison
+            const updateRequest = new mssql.Request(sql);
+            updateRequest.input("UserId", userId);
+            updateRequest.input("Token", token);
+            await updateRequest.query("UPDATE [dbo].[Users] SET AuthToken = @token WHERE UserID = @UserId");
 
-            if (!dbPassword) {
-                return res.status(401).json({ success: false, message: "Incorrect password" });
-            }
-
-            const passwordsMatch = await bcrypt.compare(UserPasswordHash, dbPassword);
-            if (passwordsMatch) {
-                const userId = result.UserID;
-                const token = jwt.sign({ userId }, "cocomelon", { expiresIn: "1y" });
-
-                const updateRequest = new mssql.Request(sql);
-                updateRequest.input("UserId", userId);
-                updateRequest.input("Token", token);
-                await updateRequest.query("UPDATE [dbo].[Users] SET AuthToken = @token WHERE UserID = @UserId");
-
-                return res.status(200).json({ success: true, token: token, data: result });
-            } else {
-                return res.status(401).json({ success: false, message: "Incorrect password" });
-            }
+            return res.status(200).json({ success: true, token: token, data: result });
         }
 
         const hashedPassword = await bcrypt.hash(UserPasswordHash, 8);
@@ -320,5 +310,4 @@ registerOrLoginUser: async (req, res) => {
         return res.status(500).json({ success: false, message: "Server error" });
     }
 }
-
 };
