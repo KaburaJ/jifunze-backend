@@ -289,7 +289,7 @@ registerOrLoginUser: async (req, res) => {
         registerRequest.input("LastName", LastName);
         registerRequest.input("UserEmail", UserEmail);
         registerRequest.input("UserPasswordHash", hashedPassword);
-        const registerResult = await registerRequest.execute("[dbo].[AddUser]");
+        const registerResult = await registerRequest.execute("INSERT INTO [db0].[Users] (FirstName, LastName, UserEmail, UserPasswordHash) VALUES (@FirstName, @LastName, @UserEmail, @hashedPassword);");
 
         if (registerResult.recordset && registerResult.recordset.length > 0) {
             const newUser = registerResult.recordset[0];
