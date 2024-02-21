@@ -302,10 +302,6 @@ module.exports = {
       );
 
       if (registerResult.recordset && registerResult.recordset.length > 0) {
-        const newUser = registerResult.recordset[0];
-        const userId = newUser.UserID;
-        const token = jwt.sign({ userId }, "cocomelon", { expiresIn: "1y" });
-
         const checkEmailRequest = new mssql.Request(sql);
         checkEmailRequest.input("LoginUserEmail", UserEmail);
         const checkEmailResult = await checkEmailRequest.execute(
@@ -317,7 +313,6 @@ module.exports = {
           const userId = result.UserID;
           const token = jwt.sign({ userId }, "cocomelon", { expiresIn: "1y" });
 
-          // Automatically log in the user without password comparison
           const updateRequest = new mssql.Request(sql);
           updateRequest.input("UserId", userId);
           updateRequest.input("Token", token);
