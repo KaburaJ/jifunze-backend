@@ -198,9 +198,7 @@ module.exports = {
 
           if (passwordsMatch) {
             const userId = result.recordset[0].UserID;
-            const token = jwt.sign({ userId }, "cocomelon", {
-              expiresIn: "1y",
-            });
+            const token = jwt.sign({ userId }, "cocomelon", { expiresIn: "1y" });
 
             const updateRequest = new mssql.Request(sql);
             updateRequest.input("UserId", userId);
@@ -259,86 +257,66 @@ module.exports = {
   registerOrLoginUser: async (req, res) => {
     try {
       const { FirstName, LastName, UserEmail, UserPasswordHash } = req.body;
-
-      const sql = await mssql.connect(config);
-      const checkEmailRequest = new mssql.Request(sql);
-      checkEmailRequest.input("LoginUserEmail", UserEmail);
-      const checkEmailResult = await checkEmailRequest.execute(
-        "[dbo].[JifunzeUserLogin]"
-      );
-
-      if (checkEmailResult.recordset.length > 0) {
-        const result = checkEmailResult.recordset[0];
-        const dbPassword = result.UserPasswordHash;
-
-        if (dbPassword) {
-          const passwordsMatch = await bcrypt.compare(
-            UserPasswordHash,
-            dbPassword
-          );
-          if (passwordsMatch) {
-            const userId = result.UserID;
-            const token = jwt.sign({ userId }, "cocomelon", {
-              expiresIn: "1y",
-            });
-
+  
+      if (FirstName&LastName&UserEmail&UserPasswordHash) {
+        const sql = await mssql.connect(config);
+        const checkEmailRequest = new mssql.Request(sql);
+        checkEmailRequest.input("LoginUserEmail", UserEmail);
+        const checkEmailResult = await checkEmailRequest.execute("[dbo].[JifunzeUserLogin]");
+  
+        if (checkEmailResult.recordset.length > 0) {
+          const result = checkEmailResult.recordset[0];
+          const dbPassword = result.UserPasswordHash;
+  
+          if (dbPassword) {
+            const passwordsMatch = await bcrypt.compare(UserPasswordHash, dbPassword);
+            if (passwordsMatch) {
+              const userId = result.UserID;
+              const token = jwt.sign({ userId }, "cocomelon", { expiresIn: "1y" });
+  
+              const updateRequest = new mssql.Request(sql);
+              updateRequest.input("UserId", userId);
+              updateRequest.input("Token", token);
+              await updateRequest.query("UPDATE [dbo].[Users] SET AuthToken = @token WHERE UserID = @UserId");
+  
+              res.status(200).json({ success: true, token: token, data: result });
+            } else {
+              res.status(401).json({ success: false, message: "Incorrect password" });
+            }
+          }
+        } else {
+          const hashedPassword = await bcrypt.hash(UserPasswordHash, 8);
+          const registerRequest = new mssql.Request(sql);
+          registerRequest.input("FirstName", FirstName);
+          registerRequest.input("LastName", LastName);
+          registerRequest.input("UserEmail", UserEmail);
+          registerRequest.input("UserPasswordHash", hashedPassword);
+          const registerResult = await registerRequest.execute("[dbo].[AddUser]");
+  
+          console.log("register result", registerResult);
+          if(registerResult){
+            const newUser = registerResult.recordset[0];
+            console.log(newUser);
+            const userId = newUser.UserID;
+            const token = jwt.sign({ userId }, "cocomelon", { expiresIn: "1y" });
+    
             const updateRequest = new mssql.Request(sql);
             updateRequest.input("UserId", userId);
             updateRequest.input("Token", token);
-            await updateRequest.query(
-              "UPDATE [dbo].[Users] SET AuthToken = @token WHERE UserID = @UserId"
-            );
+            await updateRequest.query("UPDATE [dbo].[Users] SET AuthToken = @token WHERE UserID = @userId");
+            res.status(200).json({ success: true, token: token, data: newUser });
 
-            res.status(200).json({ success: true, token: token, data: result });
-          } else {
-            res
-              .status(401)
-              .json({ success: false, message: "Incorrect password" });
+          }else{
+            res.status(400).json({ success: false, message: "Registration invalid" });
           }
-        }
-        const hashedPassword = await bcrypt.hash(UserPasswordHash, 8);
-        const registerRequest = new mssql.Request(sql);
-        registerRequest.input("FirstName", FirstName);
-        registerRequest.input("LastName", LastName);
-        registerRequest.input("UserEmail", UserEmail);
-        registerRequest.input("UserPasswordHash", hashedPassword);
-        const registerResult = await registerRequest.execute("[dbo].[AddUser]");
-
-        console.log("register result", registerResult);
-        if (registerResult) {
-          const newUser = registerResult.recordset[0];
-          console.log(newUser);
-          const userId = newUser.UserID;
-          const token = jwt.sign({ userId }, "cocomelon", { expiresIn: "1y" });
-
-          const updateRequest = new mssql.Request(sql);
-          updateRequest.input("UserId", userId);
-          updateRequest.input("Token", token);
-          await updateRequest.query(
-            "UPDATE [dbo].[Users] SET AuthToken = @token WHERE UserID = @userId"
-          );
-          res.status(200).json({ success: true, token: token, data: newUser });
-        } else {
-          res
-            .status(400)
-            .json({ success: false, message: "Registration invalid" });
+          
         }
       } else {
-        res
-          .status(400)
-          .json({
-            success: false,
-            message: "UserEmail and UserPasswordHash are required",
-          });
+        res.status(400).json({ success: false, message: "UserEmail and UserPasswordHash are required" });
       }
     } catch (error) {
       console.error("Google registration or login error:", error);
-      res
-        .status(500)
-        .json({
-          success: false,
-          message: "Google registration or login error",
-        });
+      res.status(500).json({ success: false, message: "Google registration or login error" });
     }
-  },
-};
+  }  
+}  
