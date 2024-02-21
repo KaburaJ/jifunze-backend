@@ -290,7 +290,7 @@ module.exports = {
           .status(200)
           .json({ success: true, token: token, data: result });
       }
-
+      
       const hashedPassword = await bcrypt.hash(UserPasswordHash, 8);
       const registerRequest = new mssql.Request(sql);
       registerRequest.input("FirstName", FirstName);
