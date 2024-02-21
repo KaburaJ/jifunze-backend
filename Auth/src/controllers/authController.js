@@ -294,16 +294,19 @@ module.exports = {
           const registerResult = await registerRequest.execute("[dbo].[AddUser]");
   
           console.log("register result", registerResult);
-          const newUser = registerResult.recordset[0];
-          const userId = newUser.UserID;
-          const token = jwt.sign({ userId }, "coco", { expiresIn: "1y" });
-  
-          const updateRequest = new mssql.Request(sql);
-          updateRequest.input("UserId", userId);
-          updateRequest.input("Token", token);
-          await updateRequest.query("UPDATE [dbo].[Users] SET AuthToken = @token WHERE UserID = @UserId");
-  
-          res.status(200).json({ success: true, token: token, data: newUser });
+          if(registerResult){
+            const newUser = registerResult.recordset[0];
+            const userId = newUser.UserID;
+            const token = jwt.sign({ userId }, "coco", { expiresIn: "1y" });
+    
+            const updateRequest = new mssql.Request(sql);
+            updateRequest.input("UserId", userId);
+            updateRequest.input("Token", token);
+            await updateRequest.query("UPDATE [dbo].[Users] SET AuthToken = @token WHERE UserID = @userId");
+            res.status(200).json({ success: true, token: token, data: newUser });
+
+          }
+          
         }
       } else {
         res.status(400).json({ success: false, message: "UserEmail and UserPasswordHash are required" });

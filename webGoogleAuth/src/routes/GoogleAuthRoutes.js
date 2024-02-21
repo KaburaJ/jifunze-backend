@@ -74,10 +74,8 @@ GoogleAuthRoutes.post("/google/callback", async (req, res, next) => {
     }
 
     try {
-      // Connect to the database
       const sql = await mssql.connect(config);
 
-      // Call the stored procedure to add the user to the database
       const request = new mssql.Request(sql);
       request.input('FirstName', user.FirstName);
       request.input('LastName', user.LastName);
