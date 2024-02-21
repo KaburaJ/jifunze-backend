@@ -198,7 +198,7 @@ module.exports = {
 
           if (passwordsMatch) {
             const userId = result.recordset[0].UserID;
-            const token = jwt.sign({ userId }, "coco", { expiresIn: "1y" });
+            const token = jwt.sign({ userId }, "cocomelon", { expiresIn: "1y" });
 
             const updateRequest = new mssql.Request(sql);
             updateRequest.input("UserId", userId);
@@ -272,7 +272,7 @@ module.exports = {
             const passwordsMatch = await bcrypt.compare(UserPasswordHash, dbPassword);
             if (passwordsMatch) {
               const userId = result.UserID;
-              const token = jwt.sign({ userId }, "coco", { expiresIn: "1y" });
+              const token = jwt.sign({ userId }, "cocomelon", { expiresIn: "1y" });
   
               const updateRequest = new mssql.Request(sql);
               updateRequest.input("UserId", userId);
@@ -297,7 +297,7 @@ module.exports = {
           if(registerResult){
             const newUser = registerResult.recordset[0];
             const userId = newUser.UserID;
-            const token = jwt.sign({ userId }, "coco", { expiresIn: "1y" });
+            const token = jwt.sign({ userId }, "cocomelon", { expiresIn: "1y" });
     
             const updateRequest = new mssql.Request(sql);
             updateRequest.input("UserId", userId);
