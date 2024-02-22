@@ -206,7 +206,7 @@ module.exports = {
             updateRequest.input("UserId", userId);
             updateRequest.input("Token", token);
             await updateRequest.query(
-              "UPDATE [dbo].[Users] SET AuthToken = @token WHERE UserID = @UserId"
+              "UPDATE [dbo].[Users] SET AuthToken = @Token WHERE UserID = @UserId"
             );
 
             res.status(200).json({
@@ -305,11 +305,11 @@ module.exports = {
             const updateRequest = new mssql.Request(sql);
             updateRequest.input("UserId", userId);
             updateRequest.input("Token", token);
-            await updateRequest.query("UPDATE [dbo].[Users] SET AuthToken = @token WHERE UserID = @UserId");
+            await updateRequest.query("UPDATE [dbo].[Users] SET AuthToken = @Token WHERE UserID = @UserId");
 
             return res.status(200).json({ success: true, token: token, data: userData });
         } else {
-            return res.status(500).json({ success: false, message: "Unexpected response from login procedure" });
+            return res.status(500).json({ success: false, message: "Unexpected response from login/registration procedure" });
         }
     } catch (error) {
         console.error("Error:", error);
