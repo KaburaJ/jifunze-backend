@@ -270,9 +270,6 @@ module.exports = {
         const checkEmailResult = await checkEmailRequest.execute("[dbo].[JifunzeUserLogin]");
 
         const loginMessage = checkEmailResult.recordset[0].Message;
-        const FirstNameLogged = checkEmailRequest.recordset[0].FirstName;
-        const LastNameLogged = checkEmailRequest.recordset[0].LastName;
-        const UserEmailLogged = checkEmailRequest.recordset[0].UserEmail;
 
         if (loginMessage === "User does not exist.") {
             // User does not exist, proceed with registration
@@ -280,7 +277,7 @@ module.exports = {
             const registerRequest = new mssql.Request(sql);
             registerRequest.input("FirstName", FirstName);
             registerRequest.input("LastName", LastName);
-            registerRequest.input("UserEmail", UserEmailLogged);
+            registerRequest.input("UserEmail", UserEmail);
             registerRequest.input("UserPasswordHash", hashedPassword);
             const registerResult = await registerRequest.execute("[dbo].[AddUser]");
 
