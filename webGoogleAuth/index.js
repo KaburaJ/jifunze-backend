@@ -1,44 +1,60 @@
-require("./src/config/auth");
 require("dotenv").config();
-const GoogleAuthRoutes= require("./src/routes/GoogleAuthRoutes");
 const express = require("express");
 const session = require("express-session");
 const passport = require("passport");
-const swaggerUi = require("swagger-ui-express");
-const swaggerJsdoc = require("swagger-jsdoc");
-const cors = require("cors");
+const GoogleStrategy = require('passport-google-oauth2').Strategy;
+const mssql = require('mssql');
+const config = require('../config/dbConfig.js')
+
 const app = express();
-app.use(
-  cors({
-    origin: "https://jifunze-hub-google-signup.onrender.com/",
-    credentials: true,
-    optionSuccessStatus: 200,
-  })
-);app.use(session({ secret: process.env.SECRET }));
+
+// Session configuration
+app.use(session({ 
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true
+}));
+
+// Passport initialization
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Swagger configuration
-const options = {
-  definition: {
-    openapi: "3.0.0",
-    info: {
-      title: "Your API Documentation",
-      version: "1.0.0",
-      description: "Documentation for your API",
-    },
-  },
-  apis: ["./src/routes/*.js"], // Specify the path to your route files
-};
-const specs = swaggerJsdoc(options);
+// Google OAuth strategy
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: "/google/callback",
+    passReqToCallback: true
+}, function(request, accessToken, refreshToken, profile, done) {
+    const user = {
+        firstName: profile.name.givenName,
+        lastName: profile.name.familyName,
+        email: profile.email 
+    };
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+    return done(null, user);
+}));
 
-app.get("/", (req, res) => {
-  res.send("Jifunze Hub");
+passport.serializeUser(function(user, done) {
+    done(null, user);
 });
-app.use('/', GoogleAuthRoutes)
 
+passport.deserializeUser(function(user, done) {
+    done(null, user);
+});
 
+// Routes
+const GoogleAuthRoutes = require("./src/routes/GoogleAuthRoutes");
+app.use('/', GoogleAuthRoutes);
 
-app.listen(5000, () => console.log("App listening on port 5000"));
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something went wrong!');
+});
+
+// Start server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
