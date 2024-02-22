@@ -272,9 +272,7 @@ module.exports = {
         if(checkEmailResult && checkEmailResult.recordset[0]){
           const loginMessage = checkEmailResult.recordset[0].Message;
           return loginMessage
-        }
-
-        if (loginMessage === "User does not exist.") {
+        }else if (loginMessage === "User does not exist.") {
             // User does not exist, proceed with registration
             const hashedPassword = await bcrypt.hash(UserPasswordHash, 8);
             const registerRequest = new mssql.Request(sql);
