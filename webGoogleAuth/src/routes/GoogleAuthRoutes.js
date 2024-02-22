@@ -68,6 +68,7 @@ GoogleAuthRoutes.get(
 
 GoogleAuthRoutes.get("/google/callback", async (req, res, next) => {
   passport.authenticate("google", async (err, user) => {
+    console.log(user);
     if (err || !user) {
       res.status(401).json({ success: false, message: 'Authentication failed' });
       return;
