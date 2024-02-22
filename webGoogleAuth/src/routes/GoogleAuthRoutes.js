@@ -54,28 +54,30 @@
  *         description: Authentication failed
  */
 
-require('../config/auth.js')
 const express = require('express');
 const GoogleAuthRoutes = express.Router();
 const passport = require("passport");
 const mssql = require('mssql');
-const config = require('../config/dbConfig.js')
+const config = require('../config/dbConfig.js');
 
 GoogleAuthRoutes.get(
   "/auth/google",
   passport.authenticate("google", { scope: ["email", "profile"] })
 );
 
+
 GoogleAuthRoutes.get("/google/callback", async (req, res, next) => {
   passport.authenticate("google", async (err, user) => {
-    console.log(user);
+    console.log("User:", user);
     if (err || !user) {
+      console.error("Authentication failed:", err);
       res.status(401).json({ success: false, message: 'Authentication failed' });
       return;
     }
 
     try {
       const sql = await mssql.connect(config);
+      console.log("Connected to database");
 
       const request = new mssql.Request(sql);
       request.input('FirstName', user.FirstName);
@@ -83,10 +85,13 @@ GoogleAuthRoutes.get("/google/callback", async (req, res, next) => {
       request.input('UserEmail', user.Email);
       request.input('UserPasswordHash', null);
       const result = await request.execute('[dbo].[AddUser]');
+      console.log("SQL Query executed");
 
       if (result && result.rowsAffected && result.rowsAffected[0] > 0) {
+        console.log("User added successfully");
         res.status(200).json({ success: true, message: 'User added successfully', user: user });
       } else {
+        console.error("Failed to add user to the database");
         res.status(500).json({ success: false, message: 'Failed to add user to the database' });
       }
     } catch (error) {
@@ -95,6 +100,7 @@ GoogleAuthRoutes.get("/google/callback", async (req, res, next) => {
     }
   })(req, res, next);
 });
+
 
 GoogleAuthRoutes.get("/auth/failure", (req, res) => {
   res.send("Something went wrong on our end");
