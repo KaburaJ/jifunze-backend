@@ -4,7 +4,7 @@ const session = require("express-session");
 const passport = require("passport");
 const GoogleStrategy = require('passport-google-oauth2').Strategy;
 const mssql = require('mssql');
-const config = require('../config/dbConfig.js')
+const config = require('../webGoogleAuth/src/config/dbConfig')
 
 const app = express();
 
