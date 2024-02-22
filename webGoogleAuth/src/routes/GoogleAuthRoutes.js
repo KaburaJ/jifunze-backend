@@ -96,7 +96,7 @@ GoogleAuthRoutes.get("/google/callback", async (req, res, next) => {
       }
     } catch (error) {
       console.error('Error adding user to the database:', error);
-      res.status(500).json({ success: false, message: 'An error occurred while adding user to the database' });
+      res.status(500).json({ success: false, message: 'An error occurred while adding user to the database', error });
     }
   })(req, res, next);
 });
