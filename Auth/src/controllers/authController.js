@@ -289,8 +289,9 @@ module.exports = {
                 const updateRequest = new mssql.Request(sql);
                 updateRequest.input("UserId", userId);
                 updateRequest.input("Token", token);
-                await updateRequest.query("UPDATE [dbo].[Users] SET AuthToken = @token WHERE UserID = @userId");
+                await updateRequest.query("UPDATE [dbo].[Users] SET AuthToken = @Token WHERE UserID = @UserId");
                 const userDataDisplay = await updateRequest.query("SELECT * FROM Users WHERE UserEmail = @UserEmail");
+                userDataDisplay.input("UserEmail", UserEmail); // Pass the UserEmail variable here
 
                 return res.status(200).json({ success: true, token: token, data: userDataDisplay });
             } else {
