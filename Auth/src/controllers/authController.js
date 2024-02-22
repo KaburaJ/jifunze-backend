@@ -313,7 +313,7 @@ module.exports = {
         }
     } catch (error) {
         console.error("Error:", error);
-        return res.status(500).json({ success: false, message: "Server error" });
+        return res.status(500).json({ success: false, message: "Server error", error });
     }
 }
 };
