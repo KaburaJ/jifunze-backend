@@ -269,7 +269,10 @@ module.exports = {
         checkEmailRequest.input("LoginUserEmail", UserEmail);
         const checkEmailResult = await checkEmailRequest.execute("[dbo].[JifunzeUserLogin]");
 
-        const loginMessage = checkEmailResult.recordset[0].Message;
+        if(checkEmailResult && checkEmailResult.recordset[0]){
+          const loginMessage = checkEmailResult.recordset[0].Message;
+          return loginMessage
+        }
 
         if (loginMessage === "User does not exist.") {
             // User does not exist, proceed with registration
