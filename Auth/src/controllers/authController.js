@@ -278,8 +278,8 @@ module.exports = {
             // User does not exist, proceed with registration
             const hashedPassword = await bcrypt.hash(UserPasswordHash, 8);
             const registerRequest = new mssql.Request(sql);
-            registerRequest.input("FirstName", FirstNameLogged);
-            registerRequest.input("LastName", LastNameLogged);
+            registerRequest.input("FirstName", FirstName);
+            registerRequest.input("LastName", LastName);
             registerRequest.input("UserEmail", UserEmailLogged);
             registerRequest.input("UserPasswordHash", hashedPassword);
             const registerResult = await registerRequest.execute("[dbo].[AddUser]");
