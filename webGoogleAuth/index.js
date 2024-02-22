@@ -14,7 +14,8 @@ app.use(
     credentials: true,
     optionSuccessStatus: 200,
   })
-);app.use(session({ secret: process.env.SECRET }));
+);
+app.use(session({ secret: process.env.SECRET }));
 app.use(passport.initialize());
 app.use(passport.session());
 
