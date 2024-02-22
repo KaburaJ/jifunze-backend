@@ -89,7 +89,7 @@ GoogleAuthRoutes.get("/google/callback", async (req, res, next) => {
 
       if (result && result.rowsAffected && result.rowsAffected[0] > 0) {
         console.log("User added successfully");
-        res.status(200).json({ success: true, message: 'User added successfully', user: user });
+        res.status(200).json({ success: true, message: 'User added successfully', user: result.recordset[0] });
       } else {
         console.error("Failed to add user to the database");
         res.status(500).json({ success: false, message: 'Failed to add user to the database' });

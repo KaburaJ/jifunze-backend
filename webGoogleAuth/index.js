@@ -40,6 +40,4 @@ app.get("/", (req, res) => {
 });
 app.use('/', GoogleAuthRoutes)
 
-
-
 app.listen(5000, () => console.log("App listening on port 5000"));
